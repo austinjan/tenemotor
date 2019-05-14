@@ -69,6 +69,7 @@ typings/
 # testing
 /coverage
 
+/dist
 # production
 /build
 

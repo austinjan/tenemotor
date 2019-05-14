@@ -1,4 +1,5 @@
-const dgram = window.require("dgram");
+const electron = require("electron");
+const dgram = electron.remote.require("dgram");
 
 class UDPAgent {
   constructor() {

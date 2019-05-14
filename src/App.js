@@ -1,29 +1,46 @@
-import React from "react";
-import logo from "./logo.svg";
-import "./App.css";
-import FileReader from "./components/FileReader";
+import React, { useState } from "react";
+import { BrowserRouter as Router } from "react-router-dom";
+import { Layout } from "antd";
+import Sidebar from "components/layout/Sidebar";
+import ContentArea from "components/layout/ContentArea";
 
-function App() {
+import "./App.css";
+
+const { Sider, Content } = Layout;
+
+const App = props => {
+  const [appSettings, setAppSettings] = useState({
+    collapsed: false
+  });
+
+  const handleAppSettings = {
+    setCollapsed(c) {
+      setAppSettings(preSettings => ({ ...preSettings, collapsed: c }));
+    }
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <h2> modify head</h2>
-        <FileReader />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+    <Router>
+      <Layout style={{ minHeight: "100vh" }}>
+        <Sider
+          breakpoint="sm"
+          onBreakpoint={broken => {
+            console.log(broken);
+          }}
+          className="app__side"
+          collapsible
+          onCollapse={handleAppSettings.setCollapsed}
+          collapsed={appSettings.collapsed}
         >
-          Learn React
-        </a>
-      </header>
-    </div>
+          <Sidebar />
+        </Sider>
+
+        <Content className="app__content">
+          <ContentArea />
+        </Content>
+      </Layout>
+    </Router>
   );
-}
+};
 
 export default App;

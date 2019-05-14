@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { Input, Button } from "antd";
-import UDPAgent from "../udp/udputils";
-//import fs from "fs";
-const fs = window.require("fs");
 
-const FileReader = props => {
+import UDPAgent from "libs/udp/udputils";
+const electron = require("electron");
+const fs = electron.remote.require("fs");
+
+const FileReader = () => {
   const [selectedFile, setSelectedFile] = useState("");
   const [fileContant, setFileContant] = useState("");
 
@@ -45,7 +46,12 @@ const FileReader = props => {
       </label>
 
       {fileContant ? (
-        <textarea cols="50" rows="25" value={fileContant}>
+        <textarea
+          cols={50}
+          rows={25}
+          value={fileContant}
+          style={{ color: "red" }}
+        >
           {fileContant}
         </textarea>
       ) : null}
