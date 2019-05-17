@@ -1,6 +1,7 @@
 import React from "react";
 import FileReader from "components/FileReader";
 import AjaxTest from "components/tests/AjaxTest";
+import UdpTest from "components/tests/UdpTest";
 
 export const rollerSettingRouter = [
   {
@@ -25,5 +26,11 @@ export const rollerSettingRouter = [
     name: "Fetch test",
     to: "/fetchtest",
     component: AjaxTest
+  },
+   {
+    key: "rollerSettingRouter__udptest",
+    name: "Udp test",
+    to: "/udptest",
+    component: UdpTest
   }
 ];

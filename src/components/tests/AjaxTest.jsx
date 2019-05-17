@@ -10,7 +10,7 @@ import {
   Checkbox,
   Button
 } from "antd";
-import MonacoEditor from "react-monaco-editor";
+import CodeEditor from "components/CodeEditor";
 
 const AjaxTest = props => {
   const { getFieldDecorator } = props.form;
@@ -89,12 +89,11 @@ const AjaxTest = props => {
 
             initialValue: "{}"
           })(
-            <MonacoEditor
+            <CodeEditor
               language="json"
               height="400"
               width="400"
               theme="vs-dark"
-              editorDidMount={editorDidMount}
             />
           )}
         </Form.Item>

@@ -25,7 +25,7 @@ const App = props => {
         <Sider
           breakpoint="sm"
           onBreakpoint={broken => {
-            console.log(broken);
+            console.log("App.js broken", broken);
           }}
           className="app__side"
           collapsible
