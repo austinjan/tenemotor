@@ -1,21 +1,25 @@
+import { EventEmitter } from "events";
 const electron = require("electron");
 const dgram = electron.remote.require("dgram");
 
-// -> Socket EventEmitter
-// function listen(port) {
-//   const server = dgram.createSocket("udp4");
-//   server.bind(port);
-// }
+const SINGLETON_KEY = Symbol.for("tenemotor-dgram");
 
-// class UDPAgent {
-//   constructor() {
-//     this.client = dgram.createSocket("udp4");
-//   }
+class UDPAgent {
+  constructor(
+    socket = dgram.createSocket({ type: "udp4", reuseAddr: true }),
+    ee = new EventEmitter()
+  ) {
+    this.socket = socket;
+    this.ee = ee;
+  }
+}
 
-//   emit = data => {
-//     this.client.send(data, 58375, "192.168.33.182", err => {
-//       console.log(err);
-//       this.client.close();
-//     });
-//   };
+if (!global[SINGLETON_KEY]) {
+  console.log("Init udp agent...");
+  global[SINGLETON_KEY] = new UDPAgent();
+}
+
+export default global[SINGLETON_KEY];
+// function litsen(port, cbMessage, cbError) {
+
 // }
