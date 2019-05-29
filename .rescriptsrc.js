@@ -1,10 +1,3 @@
-const logConfig = config => {
-  console.log(config);
-  return config;
-};
-
-logConfig.isMiddleware = true;
-
 module.exports = [
   require.resolve("./.webpack.config.js"),
 

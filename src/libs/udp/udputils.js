@@ -1,17 +1,21 @@
 const electron = require("electron");
 const dgram = electron.remote.require("dgram");
 
-class UDPAgent {
-  constructor() {
-    this.client = dgram.createSocket("udp4");
-  }
+// -> Socket EventEmitter
+// function listen(port) {
+//   const server = dgram.createSocket("udp4");
+//   server.bind(port);
+// }
 
-  emit = data => {
-    this.client.send(data, 58375, "192.168.33.182", err => {
-      console.log(err);
-      this.client.close();
-    });
-  };
-}
+// class UDPAgent {
+//   constructor() {
+//     this.client = dgram.createSocket("udp4");
+//   }
 
-export default UDPAgent;
+//   emit = data => {
+//     this.client.send(data, 58375, "192.168.33.182", err => {
+//       console.log(err);
+//       this.client.close();
+//     });
+//   };
+// }

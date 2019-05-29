@@ -4,7 +4,7 @@ import { Layout } from "antd";
 import Sidebar from "components/layout/Sidebar";
 import ContentArea from "components/layout/ContentArea";
 
-import "./App.css";
+import "./App.less";
 
 const { Sider, Content } = Layout;
 

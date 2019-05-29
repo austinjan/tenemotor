@@ -1,7 +1,8 @@
 import React from "react";
-import FileReader from "components/FileReader";
+import StyleGuide from "components/tests/StyleGuide";
 import AjaxTest from "components/tests/AjaxTest";
 import UdpTest from "components/tests/UdpTest";
+import RollerControl from "components/tests/RollerControl";
 
 export const rollerSettingRouter = [
   {
@@ -16,10 +17,10 @@ export const rollerSettingRouter = [
     )
   },
   {
-    key: "rollerSettingRouter__filereader",
-    name: "Test",
-    to: "/rollerSettingsTest",
-    component: FileReader
+    key: "rollerSettingRouter__styleGuide",
+    name: "Style guide",
+    to: "/rollerStyleGuide",
+    component: StyleGuide
   },
   {
     key: "rollerSettingRouter__ajaxtest",
@@ -27,10 +28,16 @@ export const rollerSettingRouter = [
     to: "/fetchtest",
     component: AjaxTest
   },
-   {
-    key: "rollerSettingRouter__udptest",
-    name: "Udp test",
-    to: "/udptest",
+  {
+    key: "rollerSettingRouter__udpclientTest",
+    name: "Udp client test",
+    to: "/udpClientTest",
     component: UdpTest
+  },
+  {
+    key: "rollerSettingRouter__rollerControl",
+    name: "Roller control",
+    to: "/rollercontrol",
+    component: RollerControl
   }
 ];

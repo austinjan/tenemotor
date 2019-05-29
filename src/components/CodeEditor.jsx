@@ -37,7 +37,7 @@ CodeEditor.propTypes = {
 CodeEditor.defaultProps = {
   theme: "vs-dark",
   language: "json",
-  width: "400",
+  width: "auto",
   height: "200"
 };
 
