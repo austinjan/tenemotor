@@ -1,4 +1,5 @@
 import { EventEmitter } from "events";
+import { EEXIST } from "constants";
 const electron = require("electron");
 const dgram = electron.remote.require("dgram");
 
@@ -12,6 +13,15 @@ class UDPAgent {
     this.socket = socket;
     this.ee = ee;
   }
+
+  send = (buffer, port, url) => {
+    this.socket.send(buffer, port, url, err => {
+      if (err) {
+        this.ee.emit("error", err);
+      }
+      this.socket.close();
+    });
+  };
 }
 
 if (!global[SINGLETON_KEY]) {

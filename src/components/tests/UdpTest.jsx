@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input, Button, InputNumber, Switch } from "antd";
 import MonacoEditor from "react-monaco-editor";
 import ReceivePackage from "components/protocol/ReceivePackage";
@@ -29,7 +29,7 @@ const getMessage = value => {
   dataArray.forEach(v => (checkSum += v));
   packageArray.push(checkSum & 255);
   packageArray.push(0x00);
-  console.log("package array: ", packageArray);
+
 
   let messageArray = [0xa0, value.messageNo, 0x00, 0x00];
   messageArray = messageArray.concat(packageArray);
@@ -53,7 +53,28 @@ const UdpTest = props => {
     port: 5566,
     listen: false
   });
+
+  let socket;
+
   const [jsonData, setJsonData] = useState(false);
+
+  useEffect(() => {
+    // socket = dgram.createSocket({ type: "udp4", reuseAddr: true });
+    // socket.on("message", (msg, rinfo) => {
+    //   console.log(`server got: ${msg} from ${rinfo.address}:${rinfo.port}`);
+    // });
+    // socket.on("error", err => {
+    //   console.log(`server error ${err}`);
+    // });
+    // socket.on("listening", () => {
+    //   const address = socket.address();
+    //   console.log(`server listening ${address.address}:${address.port}`);
+    // });
+    // socket.bind(settings.port);
+    // return () => {
+    //   socket.close();
+    // };
+  }, []);
 
   const sendData = () => {
     const client = dgram.createSocket({ type: "udp4", reuseAddr: true });
@@ -63,18 +84,24 @@ const UdpTest = props => {
       sendData = settings.data;
     } else {
       sendData = getMessage(settings.value);
-      console.log(sendData);
+   
     }
-    client.bind(settings.port, () => {
-      client.setBroadcast(true);
-      client.send(sendData, settings.port, settings.url, err => {
-        if (err) {
-          console.log("udp send err: ", err);
-        }
-        console.log("udp send data...", settings);
-        client.close();
-      });
+    client.send(sendData, settings.port, settings.url, err => {
+      if (err) {
+        console.log("udp send err%: ", err);
+      }
+      client.close();
     });
+    // client.bind(settings.port, () => {
+    //   client.setBroadcast(true);
+    //   client.send(sendData, settings.port, settings.url, err => {
+    //     if (err) {
+    //       console.log("udp send err: ", err);
+    //     }
+    //     console.log("udp send data...", settings);
+    //     client.close();
+    //   });
+    // });
   };
 
   const handleURLChanged = e => {

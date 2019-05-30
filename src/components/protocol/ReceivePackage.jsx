@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Switch } from "antd";
 const electron = require("electron");
 const dgram = electron.remote.require("dgram");
@@ -8,48 +8,47 @@ export default props => {
   const { port } = props;
   const [listen, setListen] = useState(false);
 
-  const server = useRef(null);
+  // const socket = useRef();
+  let server = dgram.createSocket({ type: "udp4", reuseAddr: true });
   useEffect(() => {
-    // server.current = dgram.createSocket({ type: "udp4", reuseAddr: true });
-    // server.current.on("listening", () => {
-    //   const address = server.current.address();
-    //   console.log(`server listening ${address.address}:${address.port}`);
-    // });
-    // server.current.on("error", err => {
-    //   console.log(`server error:\n${err.stack}`);
-    //   server.current.close();
-    // });
+    console.log("receivepackage: init");
 
-    // server.current.on("message", (msg, rinfo) => {
-    //   console.log(`server got: ${msg} from ${rinfo.address}:${rinfo.port}`);
-    // });
+    server.on("listening", () => {
+      const address = server.address();
+      console.log(`server listening ${address.address}:${address.port}`);
+    });
 
-    //server.current.bind(props.port || 5566);
+    server.on("message", (msg, rinfo) => {
+      let buffer = Uint8Array.from(msg);
 
-    return function cleanup() {
-      // server.current && server.current.close();
+      let op = String.fromCharCode(...buffer.subarray(0, 2));
+
+      let length = buffer[2];
+      if (op === "JS") {
+        let json = String.fromCharCode(...buffer.subarray(4, length + 4));
+        let response = JSON.parse(json);
+        console.log("res: ", response);
+      } else {
+        console.log("unknow response...");
+      }
+    });
+
+    server.on("error", err => {
+      console.log(`server error ${err}`);
+    });
+
+    server.bind(port);
+
+    return () => {
+      console.log("ReceivePackage close socket");
+      server.close();
     };
-  }, []);
-
-  const handleListenChanged = checked => {
-    setListen(checked);
-    if (checked) {
-      server.current && server.current.bind(port);
-    } else {
-      server.current && server.current.close();
-    }
-  };
+  }, [port, server]);
 
   return (
     <div>
-      <div className="ui_row">
-        <Switch
-          checkedChildren="On"
-          unCheckedChildren="Off"
-          defaultChecked={listen}
-          onChange={handleListenChanged}
-        />
-      </div>
+      <p>Here</p>
+      <div className="ui_row" />
     </div>
   );
 };

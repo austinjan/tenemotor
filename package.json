@@ -8,8 +8,8 @@
     "build": "rescripts build",
     "test": "rescripts test",
     "eject": "react-scripts eject",
-    "electron": "electron .",
-    "electron-dev": "concurrently \"yarn start\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron": "run-electron .",
+    "electron-dev": "concurrently \"yarn start\" \"wait-on http://localhost:3000 && run-electron .\"",
     "postinstall": "electron-builder install-app-deps",
     "preelectron-pack": "yarn build",
     "electron-pack": "build -mw"
@@ -40,6 +40,7 @@
     "react-monaco-editor": "^0.25.1",
     "react-router-dom": "^5.0.0",
     "react-scripts": "3.0.0",
+    "run-electron": "^1.0.0",
     "rx": "^4.1.0"
   },
   "devDependencies": {
