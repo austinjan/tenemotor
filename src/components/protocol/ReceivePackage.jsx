@@ -1,54 +1,62 @@
-import React, { useEffect, useState, useRef } from "react";
-import { Switch } from "antd";
-const electron = require("electron");
-const dgram = electron.remote.require("dgram");
+import React, { useEffect, useState } from "react";
+import { getUdpObserverable, jsonResponse } from "libs/udp/udputils";
+import { Table } from "antd";
+const shortid = require("shortid");
 
 // Component start here!
 export default props => {
   const { port } = props;
-  const [listen, setListen] = useState(false);
+
+  const [devices, setDevices] = useState([]);
+
+  let jsonObserver = {
+    next: v => {
+      try {
+        let item = { ...v, key: shortid.generate() };
+        setDevices(pre => [...pre, item]);
+      } catch (err) {
+        console.log("observer err:", err);
+      }
+    },
+    error: err => {
+      console.log("observer error: ", err);
+    },
+    done: () => {
+      console.log("udp observable complete!");
+    }
+  };
 
   // const socket = useRef();
-  let server = dgram.createSocket({ type: "udp4", reuseAddr: true });
+  //let server = dgram.createSocket({ type: "udp4", reuseAddr: true });
   useEffect(() => {
-    console.log("receivepackage: init");
+    const udpListener$ = getUdpObserverable(port);
+    const jsonResponse$ = jsonResponse(udpListener$);
 
-    server.on("listening", () => {
-      const address = server.address();
-      console.log(`server listening ${address.address}:${address.port}`);
-    });
-
-    server.on("message", (msg, rinfo) => {
-      let buffer = Uint8Array.from(msg);
-
-      let op = String.fromCharCode(...buffer.subarray(0, 2));
-
-      let length = buffer[2];
-      if (op === "JS") {
-        let json = String.fromCharCode(...buffer.subarray(4, length + 4));
-        let response = JSON.parse(json);
-        console.log("res: ", response);
-      } else {
-        console.log("unknow response...");
-      }
-    });
-
-    server.on("error", err => {
-      console.log(`server error ${err}`);
-    });
-
-    server.bind(port);
+    const subscription = jsonResponse$.subscribe(jsonObserver);
 
     return () => {
       console.log("ReceivePackage close socket");
-      server.close();
+      //server.close();
+      subscription.unsubscribe();
     };
-  }, [port, server]);
+  }, [jsonObserver, port]);
 
+  const rowSelectionOpt = {
+    type: "radio",
+    onChange: (key, rows) => {
+      console.log(key, rows);
+    }
+  };
   return (
     <div>
-      <p>Here</p>
-      <div className="ui_row" />
+      <Table
+        rowSelection={rowSelectionOpt}
+        dataSource={devices}
+        columns={[
+          { title: "Device", dataIndex: "devname", key: "devname" },
+          { title: "From", dataIndex: "ip", key: "ip" }
+        ]}
+      />
     </div>
   );
 };

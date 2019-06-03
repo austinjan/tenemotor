@@ -63,14 +63,20 @@ const getCheckSum8 = data => {
 };
 
 const RollerPackage = props => {
-  const { packageLength, packageString, command, rw, data } = props;
+  const { packageLength, packageString, command, rw, data, showDetail } = props;
   const { handleCommandChanged, handleRWChanged, handleDataChanged } = props;
   return (
     <div>
       <Title level={4}>Package</Title>
-      <Paragraph>
-        The op code of roller control card is 0xA0. Package please refer below.
-      </Paragraph>
+      {showDetail ? (
+        <>
+          <Paragraph>
+            The op code of roller control card is 0xA0. Package please refer
+            below.
+          </Paragraph>
+          <Text code>Raw Package: [ {packageString} ]</Text>
+        </>
+      ) : null}
 
       <table>
         <thead>
@@ -97,7 +103,6 @@ const RollerPackage = props => {
         </tbody>
       </table>
 
-      <Text code>Raw Package: [ {packageString} ]</Text>
       <div className="pp-setting-area">
         <Title level={4}>Setting package</Title>
         <div className="ui__row">
@@ -113,14 +118,13 @@ const RollerPackage = props => {
               </Option>
             ))}
           </Select>
-        </div>
-        <div className="ui__row">
           <span>R/W: </span>
           <Select defaultValue={1} onChange={handleRWChanged} key="option_rw">
             <Option value={0}>W</Option>
             <Option value={1}>R</Option>
           </Select>
         </div>
+
         <div className="ui__row">
           <span>Data(HEX) </span> <Input onChange={handleDataChanged} />
         </div>

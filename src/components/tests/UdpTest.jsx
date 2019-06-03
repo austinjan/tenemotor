@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Input, Button, InputNumber, Switch } from "antd";
 import MonacoEditor from "react-monaco-editor";
 import ReceivePackage from "components/protocol/ReceivePackage";
-
+import {
+  takeSendWithResponseObservable,
+  Op,
+  makeMessage
+} from "libs/udp/rollerutils";
 import ProtocolPage from "components/protocol/ProtocolPage";
 import "App.less";
-const electron = require("electron");
-const dgram = electron.remote.require("dgram");
 
 const getMessage = value => {
   const dataBytes = Math.ceil(value.data.length / 2);
@@ -30,7 +32,6 @@ const getMessage = value => {
   packageArray.push(checkSum & 255);
   packageArray.push(0x00);
 
-
   let messageArray = [0xa0, value.messageNo, 0x00, 0x00];
   messageArray = messageArray.concat(packageArray);
   return new Uint8Array(messageArray);
@@ -41,7 +42,7 @@ const getMessage = value => {
 //=================================================================
 const UdpTest = props => {
   const [settings, setSettings] = useState({
-    url: "192.168.33.177",
+    url: "192.168.33.159",
     data: '{"hello":"udp"}',
 
     value: {
@@ -54,54 +55,35 @@ const UdpTest = props => {
     listen: false
   });
 
-  let socket;
-
   const [jsonData, setJsonData] = useState(false);
 
-  useEffect(() => {
-    // socket = dgram.createSocket({ type: "udp4", reuseAddr: true });
-    // socket.on("message", (msg, rinfo) => {
-    //   console.log(`server got: ${msg} from ${rinfo.address}:${rinfo.port}`);
-    // });
-    // socket.on("error", err => {
-    //   console.log(`server error ${err}`);
-    // });
-    // socket.on("listening", () => {
-    //   const address = socket.address();
-    //   console.log(`server listening ${address.address}:${address.port}`);
-    // });
-    // socket.bind(settings.port);
-    // return () => {
-    //   socket.close();
-    // };
-  }, []);
-
   const sendData = () => {
-    const client = dgram.createSocket({ type: "udp4", reuseAddr: true });
-
     let sendData;
     if (jsonData) {
-      sendData = settings.data;
+      sendData = makeMessage(Op.json, settings.data);
     } else {
-      sendData = getMessage(settings.value);
-   
-    }
-    client.send(sendData, settings.port, settings.url, err => {
-      if (err) {
-        console.log("udp send err%: ", err);
+      let dataArray = [];
+      const dataBytes = Math.ceil(settings.value.data.length / 2);
+      let cursor = settings.value.data.length;
+      for (let i = 0; i < dataBytes; i++) {
+        dataArray[i] = parseInt(
+          settings.value.data.slice(cursor - 2, cursor),
+          16
+        );
+        cursor -= 2;
       }
-      client.close();
-    });
-    // client.bind(settings.port, () => {
-    //   client.setBroadcast(true);
-    //   client.send(sendData, settings.port, settings.url, err => {
-    //     if (err) {
-    //       console.log("udp send err: ", err);
-    //     }
-    //     console.log("udp send data...", settings);
-    //     client.close();
-    //   });
-    // });
+      let data = { ...settings.value, data: new Uint8Array(dataArray) };
+      sendData = makeMessage(Op.roller, data);
+    }
+
+    takeSendWithResponseObservable(
+      sendData,
+      settings.url,
+      settings.port
+    ).subscribe(
+      val => console.log("takeSendWithResponseObservable: ", val),
+      err => console.log("takeSendWithResponseObservable err: ", err)
+    );
   };
 
   const handleURLChanged = e => {
@@ -194,7 +176,7 @@ const UdpTest = props => {
           onChange={handlePortChanged}
         />
       </div>
-      <ReceivePackage port={settings.port} />
+
       <div className="ui__row">
         <span>Body: </span>
         <Switch
@@ -208,9 +190,7 @@ const UdpTest = props => {
       <Button type="primary" onClick={handleSend}>
         Send
       </Button>
-      <Button type="default">default</Button>
-      <Button type="danger">danger</Button>
-      <Button type="link">link</Button>
+      <ReceivePackage port={settings.port} />
     </div>
   );
 };

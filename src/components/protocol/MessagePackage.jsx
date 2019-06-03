@@ -16,7 +16,7 @@ const { Text, Paragraph, Title } = Typography;
 
 // Component start here
 const MessagePackage = props => {
-  const { value, handleMessageNoChanged } = props;
+  const { value, handleMessageNoChanged, showDetail } = props;
 
   // get package | Ox55 | LEN | CMD | R/W | DATA[0] ... | CHKSUM | EOF |
   // -> Uint8Array
@@ -47,6 +47,18 @@ const MessagePackage = props => {
   return (
     <div>
       <Title level={4}>Message</Title>
+      {showDetail ? (
+        <>
+          <Paragraph type="warning">
+            The maximum size of message is 256 bytes. The maximum size of
+            package is 254 bytes.
+          </Paragraph>
+          <Text code>
+            Example: [ 0xA0 {getDWHexString(value.messageNo, "0x")}{" "}
+            {getPackageString()} ]
+          </Text>
+        </>
+      ) : null}
       <table>
         <thead>
           <tr>
@@ -68,16 +80,6 @@ const MessagePackage = props => {
           </tr>
         </tbody>
       </table>
-
-      <Paragraph type="warning">
-        The maximum size of message is 256 bytes. The maximum size of package is
-        254 bytes.
-      </Paragraph>
-
-      <Text code>
-        Example: [ 0xA0 {getDWHexString(value.messageNo, "0x")}{" "}
-        {getPackageString()} ]
-      </Text>
 
       <div className="pp-setting-area">
         <Title level={4}>Setting Head</Title>
@@ -104,6 +106,7 @@ const MessagePackage = props => {
         handleCommandChanged={props.handleCommandChanged}
         handleRWChanged={props.handleRWChanged}
         handleDataChanged={props.handleDataChanged}
+        showDetail={showDetail}
         {...value}
       />
     </div>

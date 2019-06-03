@@ -41,7 +41,8 @@
     "react-router-dom": "^5.0.0",
     "react-scripts": "3.0.0",
     "run-electron": "^1.0.0",
-    "rx": "^4.1.0"
+    "rx": "^4.1.0",
+    "shortid": "^2.2.14"
   },
   "devDependencies": {
     "@rescripts/cli": "^0.0.10",
