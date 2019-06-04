@@ -5,7 +5,7 @@ const dgram = electron.remote.require("dgram");
 
 // => Observable
 // sample let listen$ = udplisten(5566)
-function getUdpObserverable(port) {
+function getUdpObservable(port) {
   //console.log("create udp observerable..");
   return new Observable(subscribe => {
     //console.log("observerable be subscribed.");
@@ -63,4 +63,4 @@ function jsonResponse(udp$) {
   }
 }
 
-export { getUdpObserverable, jsonResponse };
+export { getUdpObservable, jsonResponse };

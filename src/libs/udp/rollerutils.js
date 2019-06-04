@@ -9,7 +9,7 @@ import {
   concatMap,
   tap
 } from "rxjs/operators";
-import { getUdpObserverable } from "./udputils";
+import { getUdpObservable } from "./udputils";
 const electron = require("electron");
 const dgram = electron.remote.require("dgram");
 
@@ -31,7 +31,7 @@ const Op = {
   );
  */
 function teakRollerResponse(id, port = 5566) {
-  return getUdpObserverable(port).pipe(
+  return getUdpObservable(port).pipe(
     filter(v => {
       let buffer = Uint8Array.from(v.msg);
       let op = String.fromCharCode(...buffer.subarray(0, 2));

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getUdpObserverable, jsonResponse } from "libs/udp/udputils";
+import { getUdpObservable, jsonResponse } from "libs/udp/udputils";
 import { Table } from "antd";
 const shortid = require("shortid");
 
@@ -29,7 +29,7 @@ export default props => {
   // const socket = useRef();
   //let server = dgram.createSocket({ type: "udp4", reuseAddr: true });
   useEffect(() => {
-    const udpListener$ = getUdpObserverable(port);
+    const udpListener$ = getUdpObservable(port);
     const jsonResponse$ = jsonResponse(udpListener$);
 
     const subscription = jsonResponse$.subscribe(jsonObserver);
