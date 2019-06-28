@@ -6,7 +6,6 @@ const dgram = electron.remote.require("dgram");
 // => Observable
 // sample let listen$ = udplisten(5566)
 function getUdpObservable(port) {
-  //console.log("create udp observerable..");
   return new Observable(subscribe => {
     //console.log("observerable be subscribed.");
     let udp = dgram.createSocket({ type: "udp4", reuseAddr: true });

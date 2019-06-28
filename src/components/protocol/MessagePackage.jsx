@@ -54,7 +54,7 @@ const MessagePackage = props => {
             package is 254 bytes.
           </Paragraph>
           <Text code>
-            Example: [ 0xA0 {getDWHexString(value.messageNo, "0x")}{" "}
+            Example: [ 0xA0 {getHexString(value.messageNo, "0x")} 0x00 0x00
             {getPackageString()} ]
           </Text>
         </>

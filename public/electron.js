@@ -2,6 +2,7 @@
 const { app, BrowserWindow } = require("electron");
 const path = require("path");
 const isDev = require("electron-is-dev");
+const ipc = require("electron").ipcMain;
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -61,3 +62,20 @@ app.on("activate", function() {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+ipc.on("broadcasting", (event, arg) => {
+  //console.log("broadcasting.....", event, arg);
+  const { message, port } = arg;
+  const dgram = require("dgram");
+  //const broadcastAddress = require("broadcast-address");
+  const client = dgram.createSocket({ type: "udp4", reuseAddr: true });
+  //const ip = broadcastAddress();
+  //client.setBroadcast(true);
+  client.bind(() => {
+    client.setBroadcast(true);
+    console.log("broadcasting ", "255.255.255.255", port, message);
+    client.send(message, port, "255.255.255.255", err => {
+      client.close();
+      if (err) console.log("err:", err);
+    });
+  });
+});

@@ -3,7 +3,7 @@ import StyleGuide from "components/tests/StyleGuide";
 import AjaxTest from "components/tests/AjaxTest";
 import UdpTest from "components/tests/UdpTest";
 import RollerControl from "components/tests/RollerControl";
-
+import RxjsTesting from "components/tests/RsjsTesting";
 export const rollerSettingRouter = [
   {
     key: "rollerSettingRouter__settings",
@@ -39,5 +39,11 @@ export const rollerSettingRouter = [
     name: "Roller control",
     to: "/rollercontrol",
     component: RollerControl
+  },
+  {
+    key: "rollerSettingRouter__rxjstesting",
+    name: "RxJS testing",
+    to: "/rxjstesting",
+    component: RxjsTesting
   }
 ];
