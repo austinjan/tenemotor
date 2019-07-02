@@ -1,7 +1,7 @@
 import React from "react";
 import StyleGuide from "components/tests/StyleGuide";
 import AjaxTest from "components/tests/AjaxTest";
-import UdpTest from "components/tests/UdpTest";
+import MessageTest from "components/tests/MessageTest";
 import RollerControl from "components/tests/RollerControl";
 import RxjsTesting from "components/tests/RsjsTesting";
 export const rollerSettingRouter = [
@@ -29,10 +29,10 @@ export const rollerSettingRouter = [
     component: AjaxTest
   },
   {
-    key: "rollerSettingRouter__udpclientTest",
-    name: "Udp client test",
-    to: "/udpClientTest",
-    component: UdpTest
+    key: "rollerSettingRouter__MessageTest",
+    name: "Roller message test",
+    to: "/MessageTest",
+    component: MessageTest
   },
   {
     key: "rollerSettingRouter__rollerControl",

@@ -5,11 +5,7 @@ import PropTypes from "prop-types";
 
 import RollerPackage from "./RollerPackage";
 
-import {
-  getHexString,
-  getDWHexString,
-  convertStringToByteArray
-} from "libs/udp/BinaryUtils";
+import { getHexString, convertStringToByteArray } from "libs/udp/BinaryUtils";
 
 import "./ProtocolPage.less";
 const { Text, Paragraph, Title } = Typography;
@@ -27,6 +23,7 @@ const MessagePackage = props => {
     dataArray.forEach(v => arr.push(v));
     // check sum
     let checkSum = 0;
+    checkSum += value.command + value.rw;
     dataArray.forEach(v => (checkSum += v));
     arr.push(checkSum & 255);
 

@@ -1,18 +1,15 @@
-import React, { useState, useReducer, useCallback, useEffect } from "react";
-import { Input, Button, Typography, Row, Col, Alert } from "antd";
+import React, { useState, useReducer, useEffect } from "react";
+import { Input, Button, Typography, Row, Col } from "antd";
 import RollerControlPanel from "./RollerCongrolPanel";
 import Collapse from "components/layout/Collapse";
 import RollerTable from "components/roller/RollerTable";
+import ConnectAlert from "components/tests/ConnectionAlert";
 
 import "App.less";
-import {
-  makeMessage,
-  Op,
-  RollerParser,
-  useUDPLitsener,
-  useTCPSocket,
-  ConnectStatus
-} from "libs/udp/rollerutils";
+import { makeMessage, Op, RollerParser } from "libs/roller/rollerutils";
+
+import { useTCPSocket } from "libs/tcp/hooks";
+import { useUDPLitsener } from "libs/udp/hooks";
 
 const ipc = require("electron").ipcRenderer;
 
@@ -41,7 +38,7 @@ function rollerReducer(rollers, action) {
 
 const RollerControl = props => {
   //const [connectStatus, setConnectStatus] = useState(status.notConnected);
-  const [port, setPort] = useState(5566);
+  const [url, setUrl] = useState("192.168.33.222:5566");
   const [destination, setDestination] = useState({});
   const [rollers, dispatchRollers] = useReducer(rollerReducer, []);
 
@@ -49,7 +46,7 @@ const RollerControl = props => {
   const [currentStatus, receiveTarget, sendData] = useTCPSocket(destination);
 
   useEffect(() => {
-    const real_response = response.response || response || new Uint8Array(3);
+    const real_response = response.response || response;
     if (!RollerParser.valid(real_response)) return;
 
     const msg = RollerParser.parse(real_response);
@@ -75,15 +72,14 @@ const RollerControl = props => {
 
   const handleConnect = e => {
     e.preventDefault();
+    const data = new Uint8Array(1);
+    data[0] = 0x01;
     const message = makeMessage(Op.roller, {
-      command: 0x00,
+      command: 0x03,
       rw: 0x01,
-      data: new Uint8Array()
+      data: data
     });
-    console.log("Test connect ", currentStatus);
-    if (currentStatus === ConnectStatus.state.connected) {
-      sendData(message);
-    }
+    sendData(message);
   };
 
   const handleRollersTableRowClick = record => {
@@ -100,45 +96,20 @@ const RollerControl = props => {
     ipc.send("broadcasting", { message, port: 55954 });
   };
 
-  const handleIpChanged = e => {
+  const handleURLChanged = e => {
     e.preventDefault();
     const v = (e.target && e.target.value) || "";
-    setDestination(pre => ({ ...pre, ip: v }));
+    setUrl(v);
   };
-
-  const handlePortChanged = e => {
-    e.preventDefault();
-    const v = (e.target && e.target.value) || "";
-    setDestination(pre => ({ ...pre, port: v }));
-    setPort(v);
-  };
-
-  const ConnectAlert = (
-    <Alert
-      message={ConnectStatus.text[currentStatus]}
-      type={ConnectStatus.type[currentStatus]}
-      showIcon
-    />
-  );
 
   return (
     <div>
       <Typography.Title level={2}>Roller control panel</Typography.Title>
       <Row gutter={16}>
         <Col span={10} style={{ display: "flex" }}>
-          <Input
-            placeholder="Input IP address"
-            value={destination.ip}
-            onChange={handleIpChanged}
-          />
+          <Input placeholder="url:" value={url} onChange={handleURLChanged} />
         </Col>
-        <Col span={4}>
-          <Input
-            placeholder="Port"
-            value={destination.port}
-            onChange={handlePortChanged}
-          />
-        </Col>
+
         <Col span={5}>
           <Button
             type="primary"
@@ -158,6 +129,11 @@ const RollerControl = props => {
           </Button>
         </Col>
       </Row>
+      <Row className="ui__row">
+        <Col span={24}>
+          <ConnectAlert {...currentStatus} />
+        </Col>
+      </Row>
       <Row className="ui_row">
         <Col span={24}>
           <Collapse collapse={rollers.length === 0}>
@@ -168,9 +144,7 @@ const RollerControl = props => {
           </Collapse>
         </Col>
       </Row>
-      <Row className="ui__row">
-        <Col span={24}>{ConnectAlert}</Col>
-      </Row>
+
       <Row gutter={16} style={{ marginTop: "16px" }}>
         <Col span={12}>
           <RollerControlPanel title="Left" />

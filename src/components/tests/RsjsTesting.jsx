@@ -27,17 +27,6 @@ function getUniqueKey(refSet) {
 export default props => {
   const timeoutQueue = new Subject();
   const [state, dispatch] = useReducer(reducer, { jobs: new Set() });
-  const [count, setCount] = useState(1);
-  const [val, setValue] = useState("");
-
-  function operation() {
-    console.log("compute");
-    let sum = 0;
-    for (let i = 0; i < count * 100; i++) {
-      sum += i;
-    }
-    return sum;
-  }
   useEffect(() => {
     timeoutQueue
       .pipe(
@@ -85,15 +74,6 @@ export default props => {
       <button onClick={handleSend}>send</button>
       <button onClick={handleReceive}>receive</button>
       <div className="ui__row">{JobComponent}</div>
-      <div>
-        <h4>
-          {count}-{val}-{operation()}
-        </h4>
-        <div>
-          <button onClick={() => setCount(count + 1)}>+c1</button>
-          <input value={val} onChange={event => setValue(event.target.value)} />
-        </div>
-      </div>
     </div>
   );
 };
