@@ -1,12 +1,18 @@
-import React, { useState, useReducer, useEffect } from "react";
+import React, { useState, useReducer, useEffect, useRef } from "react";
 import { Input, Button, Typography, Row, Col } from "antd";
 import RollerControlPanel from "./RollerCongrolPanel";
 import Collapse from "components/layout/Collapse";
 import RollerTable from "components/roller/RollerTable";
 import ConnectAlert from "components/tests/ConnectionAlert";
+import NetworkingSettings from "components/roller/NetworkingSettings";
 
 import "App.less";
-import { makeMessage, Op, RollerParser } from "libs/roller/rollerutils";
+import {
+  makeMessage,
+  Op,
+  RollerParser,
+  DEFAULT_UDP_BROADCASTING_PORT
+} from "libs/roller/rollerutils";
 
 import { useTCPSocket } from "libs/tcp/hooks";
 import { useUDPLitsener } from "libs/udp/hooks";
@@ -42,8 +48,13 @@ const RollerControl = props => {
   const [destination, setDestination] = useState({});
   const [rollers, dispatchRollers] = useReducer(rollerReducer, []);
 
+  // used by NetworkingSettings
+  const [selectedRoller, setSelectRoller] = useState({});
+  const [showSettings, setShowSettings] = useState(false);
+  const networkingSettingformRef = useRef(null);
+
   const response = useUDPLitsener(55954);
-  const [currentStatus, receiveTarget, sendData] = useTCPSocket(destination);
+  const [currentStatus, res, sendData] = useTCPSocket(destination);
 
   useEffect(() => {
     const real_response = response.response || response;
@@ -82,9 +93,17 @@ const RollerControl = props => {
     sendData(message);
   };
 
-  const handleRollersTableRowClick = record => {
-    console.log("handleRollersTableRowClick ", record);
+  const handleRollersTableOnConnect = record => {
+    console.log("handleRollersTableOnConnect ", record);
     setDestination({ ip: record.ip, port: 5566 });
+    //ipc.send("tcp-connect", record);
+  };
+
+  const handleRollersTableOnSetting = record => {
+    console.log("handleRollersTableOnSetting ", record);
+    setSelectRoller(record);
+    setShowSettings(true);
+    //setDestination({ ip: record.ip, port: 5566 });
     //ipc.send("tcp-connect", record);
   };
 
@@ -93,13 +112,26 @@ const RollerControl = props => {
     const message = makeMessage(Op.atop_invite /*, { messageNo: 0 }*/);
 
     console.log("scan ");
-    ipc.send("broadcasting", { message, port: 55954 });
+    ipc.send("broadcasting", { message, port: DEFAULT_UDP_BROADCASTING_PORT });
   };
 
   const handleURLChanged = e => {
     e.preventDefault();
     const v = (e.target && e.target.value) || "";
     setUrl(v);
+  };
+
+  const handleNetworkSettingOk = () => {
+    // const { form } = networkingSettingformRef.current.props;
+    console.log("handleNetworkSettingOk");
+    // form.validateFields((err, values) => {
+    //   console.log("Networking setting: ", values);
+    // });
+    setShowSettings(false);
+  };
+
+  const handleNetworkSettingCancel = () => {
+    setShowSettings(false);
   };
 
   return (
@@ -139,7 +171,8 @@ const RollerControl = props => {
           <Collapse collapse={rollers.length === 0}>
             <RollerTable
               rollers={rollers}
-              rowClick={handleRollersTableRowClick}
+              onConnect={handleRollersTableOnConnect}
+              onSetting={handleRollersTableOnSetting}
             />
           </Collapse>
         </Col>
@@ -153,6 +186,16 @@ const RollerControl = props => {
           <RollerControlPanel title="Right" />
         </Col>
       </Row>
+
+      <NetworkingSettings
+        visible={showSettings}
+        wrappedComponentRef={form => {
+          networkingSettingformRef.current = form;
+        }}
+        onOk={handleNetworkSettingOk}
+        onCancel={handleNetworkSettingCancel}
+        rollerSettings={selectedRoller}
+      />
     </div>
   );
 };

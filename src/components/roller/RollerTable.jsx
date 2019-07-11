@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
 import PropTypes from "prop-types";
-import { Table, Button } from "antd";
+import { Table, Button, Divider } from "antd";
 
-const { Column, ColumnGroup } = Table;
+const { Column } = Table;
 
 const RollerTable = props => {
-  const { rollers, rowClick } = props;
+  const { rollers, onConnect, onSetting } = props;
   //const arraySize = Array.isArray(rollers) && rollers.length;
 
   return (
@@ -14,6 +14,9 @@ const RollerTable = props => {
         <Column title="Name" dataIndex="name" key="name" />
         <Column title="IP Address" dataIndex="ip" key="ip" />
         <Column title="MAC Address" dataIndex="mac" key="mac" />
+        <Column title="Gateway" dataIndex="gateway" key="gateway" />
+        <Column title="Subnet" dataIndex="subnet" key="subnet" />
+
         <Column
           title="Action"
           key="action"
@@ -22,10 +25,18 @@ const RollerTable = props => {
               <Button
                 onClick={() => {
                   //console.log("button click ", text, record);
-                  rowClick(record);
+                  onConnect(record);
                 }}
               >
                 Connect
+              </Button>
+              <Divider type="vertical" />
+              <Button
+                onClick={() => {
+                  onSetting(record);
+                }}
+              >
+                Setting
               </Button>
             </span>
           )}
@@ -34,12 +45,21 @@ const RollerTable = props => {
     </div>
   );
 };
+
 RollerTable.propTypes = {
-  rollers: PropTypes.array.isRequired,
-  rowClick: PropTypes.func
+  rollers: PropTypes.array,
+  onConnect: PropTypes.func,
+  onSetting: PropTypes.func
 };
+
 RollerTable.defaultProps = {
-  rollers: []
+  rollers: [],
+  onConnect: () => {
+    console.log("empty onConnect!");
+  },
+  onSetting: () => {
+    console.log("empty onSetting!");
+  }
 };
 
 export default RollerTable;

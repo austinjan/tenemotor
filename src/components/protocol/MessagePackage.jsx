@@ -4,6 +4,7 @@ import { InputNumber, Typography, Divider } from "antd";
 import PropTypes from "prop-types";
 
 import RollerPackage from "./RollerPackage";
+import { makeRollerPackage } from "libs/roller/rollerutils";
 
 import { getHexString, convertStringToByteArray } from "libs/udp/BinaryUtils";
 
@@ -39,6 +40,7 @@ const MessagePackage = props => {
 
     return stringArray;
   };
+
   const getPackageLength = () => Math.ceil(value.data.length / 2) + 2;
 
   return (
@@ -98,13 +100,12 @@ const MessagePackage = props => {
       {/* const {packageLength, packageString, command, rw, data } = props;
       const {handleCommandChanged, handleRWChanged, handleDataChanged } = props; */}
       <RollerPackage
-        packageLength={getPackageLength()}
-        packageString={getPackageString()}
         handleCommandChanged={props.handleCommandChanged}
         handleRWChanged={props.handleRWChanged}
         handleDataChanged={props.handleDataChanged}
+        handleMotorIDChanged={props.handleMotorIDChanged}
         showDetail={showDetail}
-        {...value}
+        rollerPackage={makeRollerPackage(value)}
       />
     </div>
   );

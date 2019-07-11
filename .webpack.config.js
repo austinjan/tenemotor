@@ -30,15 +30,15 @@
 //   }
 // });
 
-const MonacoWebpackPlugin = require("monaco-editor-webpack-plugin");
+// const MonacoWebpackPlugin = require("monaco-editor-webpack-plugin");
 module.exports = config => {
   const newConfig = config;
 
   newConfig.target = "electron-renderer";
-  newConfig.plugins = [
-    new MonacoWebpackPlugin({ languages: ["json"] }),
-    ...newConfig.plugins
-  ];
+  // newConfig.plugins = [
+  //   new MonacoWebpackPlugin({ languages: ["json"] }),
+  //   ...newConfig.plugins
+  // ];
 
   let rule = newConfig.module.rules.find(rule => rule.oneOf);
 

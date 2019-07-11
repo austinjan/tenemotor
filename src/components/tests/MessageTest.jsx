@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Input, Button, InputNumber, Switch } from "antd";
-import MonacoEditor from "react-monaco-editor";
+// import MonacoEditor from "react-monaco-editor";
 import ReceivePackage from "components/protocol/ReceivePackage";
 import { Op, makeMessage, test } from "libs/roller/rollerutils";
 import ProtocolPage from "components/protocol/ProtocolPage";
@@ -15,35 +15,32 @@ const MessageTest = props => {
     data: '{"hello":"udp"}',
 
     value: {
-      data: "",
+      data: [],
       rw: 1,
       command: 1,
-      messageNo: 1
+      messageNo: 1,
+      motorID: 0
     },
     port: 5566,
     listen: false
   });
 
-  const [jsonData, setJsonData] = useState(false);
-
   const sendData = () => {
     let sendData;
-    if (jsonData) {
-      sendData = makeMessage(Op.json, settings.data);
-    } else {
-      let dataArray = [];
-      const dataBytes = Math.ceil(settings.value.data.length / 2);
-      let cursor = settings.value.data.length;
-      for (let i = 0; i < dataBytes; i++) {
-        dataArray[i] = parseInt(
-          settings.value.data.slice(cursor - 2, cursor),
-          16
-        );
-        cursor -= 2;
-      }
-      let data = { ...settings.value, data: new Uint8Array(dataArray) };
-      sendData = makeMessage(Op.roller, data);
+
+    let dataArray = [];
+    const dataBytes = Math.ceil(settings.value.data.length / 2);
+    let cursor = settings.value.data.length;
+    for (let i = 0; i < dataBytes; i++) {
+      dataArray[i] = parseInt(
+        settings.value.data.slice(cursor - 2, cursor),
+        16
+      );
+      cursor -= 2;
     }
+    let data = { ...settings.value, data: new Uint8Array(dataArray) };
+    sendData = makeMessage(Op.roller, data);
+
     //send data here
   };
 
@@ -83,33 +80,18 @@ const MessageTest = props => {
     setSettings(pre => ({ ...pre, value: { ...pre.value, rw: newRW } }));
   };
 
+  const handleMotorIDChanged = v => {
+    const newRW = v || 0;
+    setSettings(pre => ({ ...pre, value: { ...pre.value, motorID: newRW } }));
+  };
+
   const handleSend = e => {
     e.preventDefault();
 
     sendData();
   };
 
-  const handleDataTypeChanged = (checked, e) => {
-    setJsonData(checked);
-  };
-  const dataElement = jsonData ? (
-    <div style={{ margin: "8px 0px" }}>
-      <MonacoEditor
-        language="json"
-        height="300"
-        options={{
-          lineNumbers: "off",
-          roundedSelection: false,
-          scrollBeyondLastLine: false,
-          readOnly: false,
-          cursorStyle: "line"
-        }}
-        theme="vs-dark"
-        value={settings.data}
-        onChange={handleDataChanged}
-      />
-    </div>
-  ) : (
+  const dataElement = (
     <div style={{ margin: "8px 0px" }}>
       <ProtocolPage
         value={settings.value}
@@ -117,6 +99,7 @@ const MessageTest = props => {
         handleCommandChanged={handleCommandChanged}
         handleRWChanged={handleRWChanged}
         handleMessageNoChanged={handleMessageNoChanged}
+        handleMotorIDChanged={handleMotorIDChanged}
       />
     </div>
   );
@@ -138,15 +121,6 @@ const MessageTest = props => {
         />
       </div>
 
-      <div className="ui__row">
-        <span>Body: </span>
-        <Switch
-          checkedChildren="JSON"
-          unCheckedChildren="BIN"
-          defaultChecked={jsonData}
-          onClick={handleDataTypeChanged}
-        />
-      </div>
       {dataElement}
       <Button type="primary" onClick={handleSend}>
         Send

@@ -1,9 +1,11 @@
 import React from "react";
 import StyleGuide from "components/tests/StyleGuide";
-import AjaxTest from "components/tests/AjaxTest";
+// import AjaxTest from "components/tests/AjaxTest";
 import MessageTest from "components/tests/MessageTest";
 import RollerControl from "components/tests/RollerControl";
 import RxjsTesting from "components/tests/RsjsTesting";
+import RollerPackageTest from "components/tests/RollerPackageTest";
+
 export const rollerSettingRouter = [
   {
     key: "rollerSettingRouter__settings",
@@ -23,12 +25,6 @@ export const rollerSettingRouter = [
     component: StyleGuide
   },
   {
-    key: "rollerSettingRouter__ajaxtest",
-    name: "Fetch test",
-    to: "/fetchtest",
-    component: AjaxTest
-  },
-  {
     key: "rollerSettingRouter__MessageTest",
     name: "Roller message test",
     to: "/MessageTest",
@@ -45,5 +41,11 @@ export const rollerSettingRouter = [
     name: "RxJS testing",
     to: "/rxjstesting",
     component: RxjsTesting
+  },
+  {
+    key: "rollerSettingRouter__rollerpackagegtest",
+    name: "Roller package testing",
+    to: "/rollerpackagetesting",
+    component: RollerPackageTest
   }
 ];

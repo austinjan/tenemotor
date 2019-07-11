@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useMemo } from "react";
 const net = require("electron").remote.require("net");
 
 //TCP hook
-// return [status, receiceData, sendData]
+// return [status, response, sendData]
 // status = {message, type}
 const useTCPSocket = target => {
   const [status, setStatus] = useState({ message: "", type: "info" });

@@ -66,14 +66,9 @@ function jsonResponse(udp$) {
  * @param {Uint8Array} message The content will send.
  */
 function sendUDPMessage(message, ip, port = 5566) {
-  // console.log("sendMessage!");
+  console.log("sendMessage!", ip, port);
   const client = dgram.createSocket({ type: "udp4", reuseAddr: true });
-  //client.setBroadcast(true);
-  // client.bind(()=>{
-  //   client.setBroadcast(true);
-  // })
 
-  // console.log("sendMessage created socket.");
   client.send(message, port, ip, err => {
     client.close();
     if (err) console.log(err);

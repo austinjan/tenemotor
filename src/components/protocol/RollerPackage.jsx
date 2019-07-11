@@ -1,13 +1,10 @@
-import React from "react";
-import { Input, Typography, Select } from "antd";
+import React, { useEffect, useState } from "react";
+import { Input, Typography, Select, InputNumber } from "antd";
 
-import {
-  getHexString,
-  getDWHexString,
-  convertStringToByteArray
-} from "libs/udp/BinaryUtils";
-
+import { getHexString, convertStringToByteArray } from "libs/udp/BinaryUtils";
+import { parseRollerPackage } from "libs/roller/rollerutils";
 import "./ProtocolPage.less";
+import is from "ramda/src/is";
 const { Text, Paragraph, Title } = Typography;
 const { Option } = Select;
 
@@ -26,7 +23,7 @@ const commandOption = [
 
 // data: 7FAB1132... => <tr>32</tr> <tr>11</tr> ...
 const getDataDom = data => {
-  const buffer = convertStringToByteArray(data);
+  const buffer = is(String)(data) ? convertStringToByteArray(data) : data;
   let domArray = [];
   for (let i = 0; i < buffer.length; i++) {
     domArray.push(
@@ -52,19 +49,33 @@ const getDataDom = data => {
   );
 };
 
-// uint8 checksum data is UInt8
-const getCheckSum8 = data => {
-  let sum = 0;
-  const arr = convertStringToByteArray(data);
-  arr.forEach(v => (sum += v));
-  const sumStr = getHexString(sum & 255);
+// const _hex = v => "0x" + v.toString(16);
 
-  return sumStr;
-};
+// // uint8 checksum data is UInt8
+// const getCheckSum8 = data => {
+//   let sum = 0;
+//   const arr = convertStringToByteArray(data);
+//   arr.forEach(v => (sum += v));
+//   const sumStr = getHexString(sum & 255);
+
+//   return sumStr;
+// };
 
 const RollerPackage = props => {
-  const { packageLength, packageString, command, rw, data, showDetail } = props;
-  const { handleCommandChanged, handleRWChanged, handleDataChanged } = props;
+  const { rollerPackage, showDetail } = props;
+  const {
+    handleCommandChanged,
+    handleRWChanged,
+    handleDataChanged,
+    handleMotorIDChanged
+  } = props;
+
+  const [parsedPackage, setParsedPackage] = useState(
+    parseRollerPackage(rollerPackage)
+  );
+  useEffect(() => {
+    setParsedPackage(parseRollerPackage(rollerPackage));
+  }, [rollerPackage]);
   return (
     <div>
       <Title level={4}>Package</Title>
@@ -74,7 +85,7 @@ const RollerPackage = props => {
             The op code of roller control card is 0xA0. Package please refer
             below.
           </Paragraph>
-          <Text code>Raw Package: [ {packageString} ]</Text>
+          <Text code>Raw Package: [ {parsedPackage.string} ]</Text>
         </>
       ) : null}
 
@@ -84,7 +95,7 @@ const RollerPackage = props => {
             <td>HEADER</td>
             <td>LENGTH</td>
             <td>CMD</td>
-            <td>R/W</td>
+            <td>MotorID | R/W</td>
             <td>DATA</td>
             <td>CHKSUM8</td>
             <td>EOF</td>
@@ -93,11 +104,13 @@ const RollerPackage = props => {
         <tbody>
           <tr>
             <td>0x55</td>
-            <td>{packageLength}</td>
-            <td>{getHexString(command, "0x")}</td>
-            <td>{rw ? "R" : "W"}</td>
-            <td> {getDataDom(data)} </td>
-            <td> {getCheckSum8(data)} </td>
+            <td>{getHexString(parsedPackage.length, "0x")}</td>
+            <td>{getHexString(parsedPackage.command, "0x")}</td>
+            <td>
+              {parsedPackage.motorID} | {parsedPackage.rw ? "R" : "W"}
+            </td>
+            <td> {getDataDom(parsedPackage.data)} </td>
+            <td> {getHexString(parsedPackage.checkSum, "0x")} </td>
             <td>0X00</td>
           </tr>
         </tbody>
@@ -123,6 +136,8 @@ const RollerPackage = props => {
             <Option value={0}>W</Option>
             <Option value={1}>R</Option>
           </Select>
+          <span>Motor ID: </span>{" "}
+          <InputNumber max={15} min={0} onChange={handleMotorIDChanged} />
         </div>
 
         <div className="ui__row">
