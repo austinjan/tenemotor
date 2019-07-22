@@ -79,3 +79,8 @@ ipc.on("broadcasting", (event, arg) => {
     });
   });
 });
+
+
+ipc.on("getSettings",(event,arg)=>{
+
+})
