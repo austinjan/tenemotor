@@ -3,83 +3,32 @@ import { Input, Button, Typography, Row, Col } from "antd";
 import RollerControlPanel from "./RollerCongrolPanel";
 import Collapse from "components/layout/Collapse";
 import RollerTable from "components/roller/RollerTable";
-import ConnectAlert from "components/tests/ConnectionAlert";
+import ConnectAlert from "components/roller/ConnectionAlert";
 import NetworkingSettings from "components/roller/NetworkingSettings";
 
 import "App.less";
-import {
-  makeMessage,
-  Op,
-  RollerParser,
-  DEFAULT_UDP_BROADCASTING_PORT
-} from "libs/roller/rollerutils";
+import { makeMessage, Op, parseRollerPackage } from "libs/roller/rollerutils";
 
 import { useTCPSocket } from "libs/tcp/hooks";
-import { useUDPLitsener } from "libs/udp/hooks";
-
-const ipc = require("electron").ipcRenderer;
-
-// const broadcastAddress = require("electron").remote.require(
-//   "broadcast-address"
-// );
-
-function rollerReducer(rollers, action) {
-  switch (action.type) {
-    case "INVITE":
-      const roller = action.payload;
-      const index = rollers.findIndex(item => {
-        return item.mac === roller.mac;
-      });
-      if (rollers[index] === roller) return rollers;
-      if (index >= 0) {
-        rollers.splice(index, 1, roller);
-      } else {
-        rollers.push(roller);
-      }
-      return [...rollers];
-    default:
-      return rollers;
-  }
-}
+import { useAtopUDPMonitor } from "libs/udp/hooks";
 
 const RollerControl = props => {
-  //const [connectStatus, setConnectStatus] = useState(status.notConnected);
   const [url, setUrl] = useState("192.168.33.222:5566");
   const [destination, setDestination] = useState({});
-  const [rollers, dispatchRollers] = useReducer(rollerReducer, []);
 
   // used by NetworkingSettings
   const [selectedRoller, setSelectRoller] = useState({});
   const [showSettings, setShowSettings] = useState(false);
   const networkingSettingformRef = useRef(null);
 
-  const response = useUDPLitsener(55954);
-  const [currentStatus, res, sendData] = useTCPSocket(destination);
+  const [rollers, Scan] = useAtopUDPMonitor(55954);
+  const [currentStatus, tcpResponse, sendData] = useTCPSocket(destination);
 
+  // useTCPSocket() response update
   useEffect(() => {
-    const real_response = response.response || response;
-    if (!RollerParser.valid(real_response)) return;
-
-    const msg = RollerParser.parse(real_response);
-
-    switch (msg.type) {
-      case "json":
-        console.log("json ", msg.message);
-        const resItem = JSON.parse(msg.message);
-        if ("mac" in resItem) {
-          resItem.key = resItem.mac;
-          dispatchRollers({ type: "INVITE", payload: resItem });
-        }
-
-        break;
-      case "roller":
-        console.log("roller ", msg.message);
-        break;
-      default:
-        console.log("response is undefined ", msg.message);
-        break;
-    }
-  }, [response]);
+    const rollerRes = parseRollerPackage(tcpResponse);
+    console.log("Rev roller res: ", rollerRes);
+  }, [tcpResponse]);
 
   const handleConnect = e => {
     e.preventDefault();
@@ -109,10 +58,7 @@ const RollerControl = props => {
 
   const handleScan = e => {
     e.preventDefault();
-    const message = makeMessage(Op.atop_invite /*, { messageNo: 0 }*/);
-
-    console.log("scan ");
-    ipc.send("broadcasting", { message, port: DEFAULT_UDP_BROADCASTING_PORT });
+    Scan();
   };
 
   const handleURLChanged = e => {
@@ -122,11 +68,6 @@ const RollerControl = props => {
   };
 
   const handleNetworkSettingOk = () => {
-    // const { form } = networkingSettingformRef.current.props;
-    console.log("handleNetworkSettingOk");
-    // form.validateFields((err, values) => {
-    //   console.log("Networking setting: ", values);
-    // });
     setShowSettings(false);
   };
 

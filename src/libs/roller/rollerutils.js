@@ -27,7 +27,7 @@ function makeRollerPackage(settings) {
     data: new Uint8Array(),
     motorID: 0
   });
-  console.log("makeRollerPackage: ", settingWithDefault);
+
   const { command, rw, data, motorID } = settingWithDefault;
   const _data = R.is(String, data) ? convertStringToByteArray(data) : data;
   const rwField = (rw & 0x0f) | ((motorID & 0x0f) << 4);
@@ -180,9 +180,10 @@ function isJSONMessage(message) {
   }
 }
 
-//////////////////////////////////////////
-// For roller package
 
+
+//////////////////////////////////////////
+// For roller package process
 const commandOption = [
   { value: 0, text: "InValid(0x00)" },
   { value: 1, text: "Phase Current" },
@@ -234,28 +235,34 @@ const getData = pkg => {
   return R.slice(4, dataEnd)(pkg);
 };
 
-/**
- * @param pkg : (Array | Uint8Array) roller package
+/** []Package -> {length, motorID, data, command, rw, commandText, string}
+ * @param _pkg : (Array | Uint8Array) roller package
  * @returns {length, motorID, data, command, rw, commandText, string}
  */
 const parseRollerPackage = pkg => {
-  console.log("parseRollerPackage: ", pkg);
-  const length = getLength(pkg);
+  const isUint8Array = R.is(Uint8Array);
+  const _pkg = isUint8Array(pkg) ? Array.from(pkg) : pkg;
+  const length = getLength(_pkg);
   const RWField = R.compose(
     splitRWField,
     getRWField
-  )(pkg);
+  )(_pkg);
   const motorID = R.prop("motorID")(RWField);
   const rw = R.prop("rw")(RWField);
-  const data = getData(pkg);
-  const commandText = getCommandText(pkg);
-  const command = getCommand(pkg);
+  const data = getData(_pkg);
+  const commandText = getCommandText(_pkg);
+  const command = getCommand(_pkg);
   const tostr = v => " 0x" + v.toString(16);
-  const string = R.map(tostr)(pkg);
-  const checkSum = pkg[getLength(pkg) + 2];
+  const string = R.map(tostr)(_pkg);
+  const checkSum = _pkg[getLength(_pkg) + 2];
   return { length, motorID, rw, data, commandText, command, string, checkSum };
 };
 
+/**
+ * MassageParser.isRollerMessage()
+ * MessageParser.isJSONMessage()
+ * MessageParser.parse()
+ */
 const MessageParser = {
   isRollerMessage: msg => isRollerMessage(msg),
   isJSONMessage: msg => isJSONMessage(msg),
@@ -273,6 +280,7 @@ const MessageParser = {
   },
   valid: msg => isRollerMessage(msg) || isJSONMessage(msg)
 };
+
 export {
   Op,
   makeMessage,

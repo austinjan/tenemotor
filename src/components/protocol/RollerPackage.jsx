@@ -49,18 +49,16 @@ const getDataDom = data => {
   );
 };
 
-// const _hex = v => "0x" + v.toString(16);
-
-// // uint8 checksum data is UInt8
-// const getCheckSum8 = data => {
-//   let sum = 0;
-//   const arr = convertStringToByteArray(data);
-//   arr.forEach(v => (sum += v));
-//   const sumStr = getHexString(sum & 255);
-
-//   return sumStr;
-// };
-
+/**
+ * props:
+ * rollerPackage:  use makeRollerPacakge({*}) make real package
+ * showDetail: show more information
+ *
+ *  handleCommandChanged,
+    handleRWChanged,
+    handleDataChanged,
+    handleMotorIDChanged
+ */
 const RollerPackage = props => {
   const { rollerPackage, showDetail } = props;
   const {
@@ -73,9 +71,11 @@ const RollerPackage = props => {
   const [parsedPackage, setParsedPackage] = useState(
     parseRollerPackage(rollerPackage)
   );
+
   useEffect(() => {
     setParsedPackage(parseRollerPackage(rollerPackage));
   }, [rollerPackage]);
+
   return (
     <div>
       <Title level={4}>Package</Title>
@@ -121,7 +121,7 @@ const RollerPackage = props => {
         <div className="ui__row">
           <span>Command: </span>
           <Select
-            defaultValue={1}
+            defaultValue={parsedPackage.command}
             onChange={handleCommandChanged}
             key="option_command"
           >
@@ -132,7 +132,11 @@ const RollerPackage = props => {
             ))}
           </Select>
           <span>R/W: </span>
-          <Select defaultValue={1} onChange={handleRWChanged} key="option_rw">
+          <Select
+            defaultValue={parsedPackage.rw}
+            onChange={handleRWChanged}
+            key="option_rw"
+          >
             <Option value={0}>W</Option>
             <Option value={1}>R</Option>
           </Select>

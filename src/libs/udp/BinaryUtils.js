@@ -1,7 +1,11 @@
 // Library for binary
 // num to string, string to Uint8Array...
+import is from "ramda/src/is";
+import complement from "ramda/src/complement";
 
 const getHexString = (num, prefix = "") => {
+  const isNotNumber = complement(is(Number));
+  if (isNotNumber(num)) return "";
   let rawStr = num.toString(16);
   if (rawStr.length % 2) {
     return prefix + "0" + rawStr;

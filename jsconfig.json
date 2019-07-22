@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
+    "target": "ES6",
     "module": "commonjs",
-    "target": "es2016",
-    "jsx": "preserve",
+    "allowSyntheticDefaultImports": true,
+    "jsx": "react",
     "checkJs": true,
     "baseUrl": "./src"
   },
-
   "exclude": ["node_modules", "**/node_modules/*", "build", "dist"]
 }

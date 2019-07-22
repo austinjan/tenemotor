@@ -113,7 +113,7 @@ const MessagePackage = props => {
 
 MessagePackage.propTypes = {
   value: PropTypes.shape({
-    data: PropTypes.string,
+    data: PropTypes.array,
     rw: PropTypes.number,
     command: PropTypes.number,
     messageNo: PropTypes.number

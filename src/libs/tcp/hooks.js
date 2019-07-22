@@ -1,24 +1,31 @@
 import { useEffect, useState, useRef, useMemo } from "react";
+import mergeLeft from "ramda/src/mergeLeft";
 const net = require("electron").remote.require("net");
 
-//TCP hook
-// return [status, response, sendData]
-// status = {message, type}
+/**
+ * Connect to socket
+ * const [currentStatus, tcpResponse, sendData] = useTCPSocket(destination);
+ * @param {*} target {ip,port=5566}
+ * @returns [status, receiveData, sendData];
+ *  - status {message, type} can pass to <ConnectionAlert>  ex: <ConnectAlert {...status} />
+ *  - rereceiveData: response from remote tcp socket.
+ *  - sendData() : sendData()
+ */
 const useTCPSocket = target => {
   const [status, setStatus] = useState({ message: "", type: "info" });
-  const [receiveData, setReceiveData] = useState("");
+  const [receiveData, setReceiveData] = useState([]);
   const socket = useRef(null);
 
   const validTarget = useMemo(() => {
-    console.log("useTCPSocket useEffect valid target ");
-    const port = target.port || undefined;
+    const _t = mergeLeft(target, { port: 5566 });
+    console.log("useTCPSocket useEffect valid target ", _t);
+
     const ip = target.ip || undefined;
-    if (port && ip) {
-      return target;
+    if (ip) {
+      return _t;
     } else return null;
   }, [target]);
 
-  //const [client, setClient] = useState(new net.Socket());
   useEffect(() => {
     socket.current = new net.Socket();
     //socket.current.setTimeout(3000);
@@ -51,6 +58,7 @@ const useTCPSocket = target => {
         }));
         setReceiveData(rev);
       });
+      
       socket.current.on("close", () => {
         console.log("tcp onClose");
         setStatus(pre => ({
@@ -61,7 +69,7 @@ const useTCPSocket = target => {
       });
 
       socket.current.on("error", err => {
-        console.log("tcp onError");
+        console.log("tcp onError", err);
         setStatus(pre => ({ ...pre, type: "error", message: `Error ${err}` }));
         socket.current.destroy();
       });
@@ -86,8 +94,11 @@ const useTCPSocket = target => {
     };
   }, [validTarget]);
 
+  /**
+   *
+   * @param String|Uint8Array message
+   */
   function sendData(message) {
-    console.log("useTCPSocket sendData: ", socket.current);
     try {
       const success = socket.current.write(message);
       if (success)
