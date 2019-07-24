@@ -1,14 +1,23 @@
-import { useState } from "react";
+// @flow
+import { useState, useEffect } from "react";
 import mergeLeft from "ramda/src/mergeLeft";
-import mergeRight from "ramda/src/mergeRight";
 import has from "ramda/src/has";
-import forEachObjectIndex from "ramda/src/forEachObjIndexed";
 import is from "ramda/src/is";
 import { convertStringToByteArray } from "libs/udp/BinaryUtils";
+import equals from "ramda/src/equals";
+import props from "ramda/src/props";
+import reduce from "ramda/src/reduce";
+const ipc = require("electron").ipcRenderer;
 
 // Roller package hook
 // return []
 
+type UseRollerArg = {
+  command: Number,
+  rw: Number,
+  motorID: Number,
+  data: Array<number>
+};
 // <RollerPackage {...handlers } />
 /**
  *
@@ -19,7 +28,7 @@ import { convertStringToByteArray } from "libs/udp/BinaryUtils";
  *  const [handler] = useRollerPackage({});
  *  <ComponentCarePackage {...handler} />
  */
-const useRollerPackage = initOptions => {
+const useRollerPackage = (initOptions: UseRollerArg): Array<mixed> => {
   const _init = mergeLeft(initOptions, {
     command: 0x00,
     rw: 0x00,
@@ -48,22 +57,65 @@ const useRollerPackage = initOptions => {
     handleMotorIDChanged: v => setSettings({ ...settings, motorID: v })
   };
 
-  // function setRollerOpt(opt) {
-  //   const settingFunctions = {
-  //     command: setCommand,
-  //     rw: setRW,
-  //     motorID: setMotorID,
-  //     data: setData
-  //   };
-  //   const setArgs = forEachObjectIndex((v, k) => {
-  //     if (has(k, settingFunctions)) {
-  //       settingFunctions[k](v);
-  //     }
-  //   });
-  //   setArgs(opt);
-  // }
-
   return [settings, handlers];
 };
 
-export { useRollerPackage };
+/**
+ * @param initSettings: setting with json format
+ * @returns [settings, setSettings] : [String, (json: string) => {}]
+ */
+
+type SetStateAction<S> = S | ((prevState: S) => S);
+type Dispatch<A> = (value: A) => void;
+type useRollerSettingsReturn = [
+  String,
+  { message: String, type: String },
+  Dispatch<SetStateAction<String>>
+];
+
+const useRollerSettings = (initSettings: ?String): useRollerSettingsReturn => {
+  const [jsonSettings, setJsonSettings] = useState(initSettings);
+  const [responseState, setResponseState] = useState({
+    message: "",
+    type: "info"
+  });
+
+  useEffect(() => {
+    ipc.send("getSettings");
+    setResponseState({ type: "info", message: "Loading roller settings." });
+    return () => {
+      ipc.removeAllListeners("response_settings", () => {});
+      ipc.removeAllListeners("settings_err", () => {});
+      ipc.removeAllListeners("set_settings_done", () => {});
+    };
+  }, []);
+
+  ipc.on("response_settings", function(event, arg) {
+    if (!equals(arg, jsonSettings)) {
+      setJsonSettings(arg);
+      setResponseState({ type: "info", message: "Loading done..." });
+    }
+  });
+
+  ipc.on("settings_err", function(event, arg) {
+    const errArguments = props(["code", "path"], arg);
+    const msg = is(String, arg)
+      ? arg
+      : reduce((acc, elem) => acc + " " + elem, "", errArguments);
+
+    setResponseState({ type: "error", message: msg });
+  });
+
+  ipc.on("set_settings_done", (event, arg) => {
+    setResponseState({ type: "info", message: "Writting done..." });
+  });
+
+  const writeSettings = (settings: string) => {
+    ipc.on("setSettings", (settings = "{}"));
+    setResponseState({ type: "info", message: "Writting..." });
+  };
+
+  return [jsonSettings, responseState, writeSettings];
+};
+
+export { useRollerPackage, useRollerSettings };

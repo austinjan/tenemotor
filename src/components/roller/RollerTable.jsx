@@ -1,8 +1,11 @@
+// @flow
 import React from "react";
 import PropTypes from "prop-types";
 import { Table, Button, Divider } from "antd";
 
 const { Column } = Table;
+
+const EditableCell = () => {};
 
 const RollerTable = props => {
   const { rollers, onConnect, onSetting } = props;
@@ -10,12 +13,12 @@ const RollerTable = props => {
 
   return (
     <div>
-      <Table dataSource={rollers}>
-        <Column title="Name" dataIndex="name" key="name" />
+      <Table dataSource={rollers} size="small">
+        <Column title="Name" dataIndex="name" key="name" editable />
         <Column title="IP Address" dataIndex="ip" key="ip" />
         <Column title="MAC Address" dataIndex="mac" key="mac" />
-        <Column title="Gateway" dataIndex="gateway" key="gateway" />
-        <Column title="Subnet" dataIndex="subnet" key="subnet" />
+        {/* <Column title="Gateway" dataIndex="gateway" key="gateway" />
+        <Column title="Subnet" dataIndex="subnet" key="subnet" /> */}
 
         <Column
           title="Action"

@@ -180,8 +180,6 @@ function isJSONMessage(message) {
   }
 }
 
-
-
 //////////////////////////////////////////
 // For roller package process
 const commandOption = [
@@ -285,7 +283,7 @@ export {
   Op,
   makeMessage,
   test,
-  MessageParser as RollerParser,
+  MessageParser,
   makeRollerPackage,
   parseRollerPackage
 };

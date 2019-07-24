@@ -1,7 +1,7 @@
 import { useState, useEffect, useReducer, useCallback } from "react";
 import { Observable } from "rxjs";
 import {
-  RollerParser,
+  MessageParser,
   makeMessage,
   DEFAULT_UDP_BROADCASTING_PORT,
   Op
@@ -14,10 +14,10 @@ const dgram = electron.remote.require("dgram");
 const useUDPLitsener = initPort => {
   const [response, setResponse] = useState({});
   useEffect(() => {
-    console.log("useUDPLitsener useEffect......");
+    // console.log("useUDPLitsener useEffect......");
     const receiver$ = Observable.create(observer => {
       const client = dgram.createSocket({ type: "udp4", reuseAddr: true });
-      console.log("response$ created bind port: ", initPort);
+      // console.log("response$ created bind port: ", initPort);
       client.bind(initPort);
 
       client.on("message", msg => {
@@ -45,7 +45,7 @@ const useUDPLitsener = initPort => {
       () => console.log("udp receiver completet")
     );
     return () => {
-      console.log("useUDPLitsener useEffect clean up...");
+      // console.log("useUDPLitsener useEffect clean up...");
       observer.unsubscribe();
     };
   }, [initPort]);
@@ -84,9 +84,9 @@ const useAtopUDPMonitor = initPort => {
   const [rollers, dispatchRollers] = useReducer(rollerReducer, []);
   useEffect(() => {
     const real_response = response.response || response;
-    if (!RollerParser.valid(real_response)) return;
+    if (!MessageParser.valid(real_response)) return;
 
-    const msg = RollerParser.parse(real_response);
+    const msg = MessageParser.parse(real_response);
 
     switch (msg.type) {
       case "json":
@@ -105,7 +105,7 @@ const useAtopUDPMonitor = initPort => {
 
   const scan = useCallback(() => {
     const message = makeMessage(Op.atop_invite);
-    console.log("scan :", message);
+    //console.log("scan :", message);
     require("electron").ipcRenderer.send("broadcasting", {
       message,
       port: DEFAULT_UDP_BROADCASTING_PORT

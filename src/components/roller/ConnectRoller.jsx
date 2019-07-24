@@ -12,18 +12,9 @@ import isEmpty from "ramda/src/isEmpty";
  * rollers -> [{ip,mac,...}] array of rollers (you can get from useAtopUDPMonitor())
  */
 
-//  ConnectRoller.propTypes = {
-//    onConnect: PropTypes.func,
-//    rollers: PropTypes.array
-//  };
-
-//  ConnectRoller.defaultProps = {
-//    onConnect: () => {},
-//    rollers: []
-//  };
 type Props = {
   onConnect: ({}) => {},
-  rollers: Array<{}>
+  rollers: [{ ip: String, mac: String }]
 };
 
 const ConnectRoller = (props: Props) => {

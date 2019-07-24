@@ -80,7 +80,29 @@ ipc.on("broadcasting", (event, arg) => {
   });
 });
 
+ipc.on("getSettings", (event, arg) => {
+  const pws = process.cwd();
+  const settingsFilePath = require("path").join(pws, "settings.json");
+  const fs = require("fs");
+  fs.readFile(settingsFilePath, (err, buffer) => {
+    if (err) {
+      event.sender.send("settings_err", err);
+      return;
+    }
 
-ipc.on("getSettings",(event,arg)=>{
+    event.sender.send("response_settings", buffer.toString("utf8"));
+  });
+});
 
-})
+ipc.on("setSettings", (event, arg) => {
+  const pws = process.cwd();
+  const settingsFilePath = require("path").join(pws, "settings.json");
+  const fs = require("fs");
+  fs.writeFile(settingsFilePath, arg, err => {
+    if (err) {
+      event.sender.send("settings_err", err);
+      return;
+    }
+    event.sender.send("response_settings", arg);
+  });
+});
