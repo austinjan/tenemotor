@@ -1,4 +1,4 @@
-export { useRollerPackage, useRollerSettings } from "./hooks";
+export { useRollerPackage, useRollers } from "./hooks";
 export {
   Op,
   makeMessage,
@@ -13,5 +13,6 @@ export {
   alterRollerName,
   isRollerExist,
   mergeRoller,
-  updateRoller
+  updateRoller,
+  getRollerName
 } from "./settingsutils";

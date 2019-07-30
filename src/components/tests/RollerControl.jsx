@@ -1,13 +1,21 @@
-import React, { useState, useReducer, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Input, Button, Typography, Row, Col } from "antd";
 import RollerControlPanel from "./RollerCongrolPanel";
 import Collapse from "components/layout/Collapse";
 import RollerTable from "components/roller/RollerTable";
 import ConnectAlert from "components/roller/ConnectionAlert";
-import NetworkingSettings from "components/roller/NetworkingSettings";
+import RollerSettingDialog from "components/roller/RollerSettingDialog";
+import isEmpty from "ramda/src/isEmpty";
+import map from "ramda/src/map";
 
 import "App.less";
-import { makeMessage, Op, parseRollerPackage } from "libs/roller/rollerutils";
+import {
+  makeMessage,
+  Op,
+  parseRollerPackage,
+  MessageParser,
+  useRollers
+} from "libs/roller";
 
 import { useTCPSocket } from "libs/tcp/hooks";
 import { useAtopUDPMonitor } from "libs/udp/hooks";
@@ -16,19 +24,50 @@ const RollerControl = props => {
   const [url, setUrl] = useState("192.168.33.222:5566");
   const [destination, setDestination] = useState({});
 
-  // used by NetworkingSettings
+  // used by RollerSettingDialog
   const [selectedRoller, setSelectRoller] = useState({});
   const [showSettings, setShowSettings] = useState(false);
-  const networkingSettingformRef = useRef(null);
 
   const [rollers, Scan] = useAtopUDPMonitor(55954);
   const [currentStatus, tcpResponse, sendData] = useTCPSocket(destination);
+  const [
+    settingRollers,
+    updateRollerByMac,
+    interSection,
+    writeBack
+  ] = useRollers();
 
   // useTCPSocket() response update
   useEffect(() => {
-    const rollerRes = parseRollerPackage(tcpResponse);
-    console.log("Rev roller res: ", rollerRes);
+    const resinfo = MessageParser.parse(tcpResponse);
+    switch (resinfo.type) {
+      case "roller":
+        const rollerRes = parseRollerPackage(tcpResponse.slice(4));
+        console.log("Rev roller res: ", rollerRes);
+        break;
+      case "json":
+        console.log("Rev json res: ", rollerRes);
+        break;
+      default:
+        console.log("Unknown response ");
+    }
   }, [tcpResponse]);
+
+  // rollers
+  useEffect(() => {
+    map(r => {
+      updateRollerByMac(r);
+    }, rollers);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rollers]);
+
+  //settings
+  useEffect(() => {
+    if (!isEmpty(settingRollers)) {
+      writeBack();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settingRollers]);
 
   const handleConnect = e => {
     e.preventDefault();
@@ -42,18 +81,28 @@ const RollerControl = props => {
     sendData(message);
   };
 
+  const handleNetworkingSettingChanged = roller => {
+    console.log("handleRollerSettingChanged ", roller);
+    updateRollerByMac(roller);
+  };
+
+  const handleRollerSettingsChanged = settings => {
+    try {
+      const msg = makeMessage(Op.set_settings, JSON.stringify(settings));
+      console.log("handleRollerSettingsChanged - ", settings, msg);
+      sendData(msg);
+    } catch (err) {
+      console.log("handleRollerSettingsChanged json fiald", settings);
+    }
+  };
+
   const handleRollersTableOnConnect = record => {
-    console.log("handleRollersTableOnConnect ", record);
     setDestination({ ip: record.ip, port: 5566 });
-    //ipc.send("tcp-connect", record);
   };
 
   const handleRollersTableOnSetting = record => {
-    console.log("handleRollersTableOnSetting ", record);
     setSelectRoller(record);
     setShowSettings(true);
-    //setDestination({ ip: record.ip, port: 5566 });
-    //ipc.send("tcp-connect", record);
   };
 
   const handleScan = e => {
@@ -67,11 +116,11 @@ const RollerControl = props => {
     setUrl(v);
   };
 
-  const handleNetworkSettingOk = () => {
+  const handleSettingsOk = () => {
     setShowSettings(false);
   };
 
-  const handleNetworkSettingCancel = () => {
+  const handleSettingsCancel = () => {
     setShowSettings(false);
   };
 
@@ -111,7 +160,7 @@ const RollerControl = props => {
         <Col span={24}>
           <Collapse collapse={rollers.length === 0}>
             <RollerTable
-              rollers={rollers}
+              rollers={interSection(rollers)}
               onConnect={handleRollersTableOnConnect}
               onSetting={handleRollersTableOnSetting}
             />
@@ -128,14 +177,13 @@ const RollerControl = props => {
         </Col>
       </Row>
 
-      <NetworkingSettings
+      <RollerSettingDialog
         visible={showSettings}
-        wrappedComponentRef={form => {
-          networkingSettingformRef.current = form;
-        }}
-        onOk={handleNetworkSettingOk}
-        onCancel={handleNetworkSettingCancel}
+        onOk={handleSettingsOk}
+        onCancel={handleSettingsCancel}
         rollerSettings={selectedRoller}
+        onNetworkingChanged={handleNetworkingSettingChanged}
+        onRollerSettingsChanged={handleRollerSettingsChanged}
       />
     </div>
   );

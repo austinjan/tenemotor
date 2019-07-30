@@ -103,6 +103,6 @@ ipc.on("setSettings", (event, arg) => {
       event.sender.send("settings_err", err);
       return;
     }
-    event.sender.send("response_settings", arg);
+    event.sender.send("set_settings_done", arg);
   });
 });

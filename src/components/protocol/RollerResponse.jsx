@@ -23,7 +23,7 @@ const RollerResponse = props => {
   const [parsedPackage, setParsedPackage] = useState(parseRollerPackage(pkg));
 
   useEffect(() => {
-    setParsedPackage(parseRollerPackage(pkg));
+    setParsedPackage(parseRollerPackage(pkg.slice(4)));
   }, [pkg]);
 
   return (

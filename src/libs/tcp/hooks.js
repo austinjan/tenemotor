@@ -12,7 +12,11 @@ const net = require("electron").remote.require("net");
  *  - sendData() : sendData()
  */
 const useTCPSocket = target => {
-  const [status, setStatus] = useState({ message: "", type: "info" });
+  const [status, setStatus] = useState({
+    message: "",
+    type: "info",
+    connected: false
+  });
   const [receiveData, setReceiveData] = useState([]);
   const socket = useRef(null);
 
@@ -36,12 +40,20 @@ const useTCPSocket = target => {
           setStatus(pre => ({
             ...pre,
             type: "info",
-            message: `Connect to ${validTarget.ip}:${validTarget.port} success!`
+            message: `Connect to ${validTarget.ip}:${
+              validTarget.port
+            } success!`,
+            connected: true
           }));
           socket.current.write("hello");
         });
       } catch (err) {
-        setStatus(pre => ({ ...pre, type: "error", message: `Error ${err}` }));
+        setStatus(pre => ({
+          ...pre,
+          type: "error",
+          message: `Error ${err}`,
+          connected: false
+        }));
         socket.current.destroy();
       }
 
@@ -58,19 +70,25 @@ const useTCPSocket = target => {
         }));
         setReceiveData(rev);
       });
-      
+
       socket.current.on("close", () => {
         console.log("tcp onClose");
         setStatus(pre => ({
           ...pre,
           type: "warning",
-          message: `Socket closed !`
+          message: `Socket closed !`,
+          connected: false
         }));
       });
 
       socket.current.on("error", err => {
         console.log("tcp onError", err);
-        setStatus(pre => ({ ...pre, type: "error", message: `Error ${err}` }));
+        setStatus(pre => ({
+          ...pre,
+          type: "error",
+          message: `Error ${err}`,
+          connected: false
+        }));
         socket.current.destroy();
       });
 
@@ -81,7 +99,8 @@ const useTCPSocket = target => {
           type: "error",
           message: `Timeout when connect to ${validTarget.ip}:${
             validTarget.port
-          }`
+          }`,
+          connected: false
         }));
         socket.current.end();
       });
@@ -91,6 +110,10 @@ const useTCPSocket = target => {
       console.log("useTCPSocket clean up socket...");
       setStatus(pre => ({ ...pre, type: "info", message: "" }));
       socket.current.end();
+      socket.current.removeAllListeners("data", () => {});
+      socket.current.removeAllListeners("error", () => {});
+      socket.current.removeAllListeners("close", () => {});
+      socket.current.removeAllListeners("timeout", () => {});
     };
   }, [validTarget]);
 

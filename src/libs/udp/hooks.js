@@ -14,7 +14,7 @@ const dgram = electron.remote.require("dgram");
 const useUDPLitsener = initPort => {
   const [response, setResponse] = useState({});
   useEffect(() => {
-    // console.log("useUDPLitsener useEffect......");
+    console.log("useUDPLitsener useEffect......");
     const receiver$ = Observable.create(observer => {
       const client = dgram.createSocket({ type: "udp4", reuseAddr: true });
       // console.log("response$ created bind port: ", initPort);
@@ -33,7 +33,12 @@ const useUDPLitsener = initPort => {
         observer.complete();
       });
 
-      return () => client.close();
+      return () => {
+        client.removeAllListeners("message", () => {});
+        client.removeAllListeners("error", () => {});
+        client.removeAllListeners("close", () => {});
+        client.close();
+      };
     });
 
     const observer = receiver$.subscribe(
@@ -46,6 +51,7 @@ const useUDPLitsener = initPort => {
     );
     return () => {
       // console.log("useUDPLitsener useEffect clean up...");
+
       observer.unsubscribe();
     };
   }, [initPort]);
@@ -111,6 +117,7 @@ const useAtopUDPMonitor = initPort => {
       port: DEFAULT_UDP_BROADCASTING_PORT
     });
   }, []);
+
   return [rollers, scan];
 };
 

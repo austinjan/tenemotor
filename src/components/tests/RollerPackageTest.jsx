@@ -8,8 +8,7 @@ import {
   makeRollerPackage,
   Op,
   makeMessage,
-  useRollerPackage,
-  useRollerSettings
+  useRollerPackage
 } from "libs/roller";
 import isEmpty from "ramda/src/isEmpty";
 import { useTCPSocket } from "libs/tcp/hooks";
@@ -23,11 +22,6 @@ const RollerPackageTest = () => {
   const [rollers, Scan] = useAtopUDPMonitor(55954);
   const [destination, setDestination] = useState({});
   const [currentStatus, tcpResponse, sendData] = useTCPSocket(destination);
-  const [
-    rollerSettings,
-    settingResponse,
-    setRollerSettings
-  ] = useRollerSettings();
 
   useEffect(() => {
     console.log("Roller Package test use effect....");
@@ -50,9 +44,6 @@ const RollerPackageTest = () => {
       <Title level={3}> Connet </Title>
       <ConnectionAlert {...currentStatus} />
 
-      <Title level={3}> Settings </Title>
-      <ConnectionAlert {...settingResponse} />
-      {isEmpty(rollerSettings) ? null : <Text code> {rollerSettings} </Text>}
       <ConnectRoller onConnect={connectSocket} rollers={rollers} />
       <RollerPackage
         rollerPackage={makeRollerPackage(packageOpt)}

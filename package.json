@@ -47,7 +47,8 @@
     "react-scripts": "3.0.0",
     "run-electron": "^1.0.0",
     "rx": "^4.1.0",
-    "shortid": "^2.2.14"
+    "shortid": "^2.2.14",
+    "yup": "^0.27.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.5.5",

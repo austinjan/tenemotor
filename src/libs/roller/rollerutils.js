@@ -1,3 +1,4 @@
+// @flow
 import { Subject } from "rxjs";
 import { filter, tap } from "rxjs/operators";
 import * as R from "ramda";
@@ -10,9 +11,17 @@ const Op = {
   roller: 0xa1,
   json: 0xa2,
   atop_invite: 0x02,
+  get_settings: 0xb0,
+  set_settings: 0xb1,
   config: 0x00
 };
 
+type tRollerSetting = {
+  command: Number,
+  rw: Number,
+  data: Array<number> | Uint8Array,
+  motorID: Number
+};
 /**
  * {command,rw,data,motoID} -> [Package]
  * @description Make package will send to Tene roller control card.
@@ -20,10 +29,11 @@ const Op = {
 
  * @returns roller package array
  */
-function makeRollerPackage(settings) {
+function makeRollerPackage(settings: tRollerSetting) {
   const settingWithDefault = R.mergeLeft(settings, {
     command: 0x00,
     rw: 0x01,
+    // $FlowFixMe
     data: new Uint8Array(),
     motorID: 0
   });
@@ -102,6 +112,25 @@ function makeRollerMessage(data, Left = true) {
   return new Uint8Array(message);
 }
 
+function makeGetSettingMessage() {}
+
+/**
+ * Make roller message for set settings in to roller.
+ * @param {string} data json string of settings.
+ */
+function makeSetSettingMessage(data: string): Uint8Array {
+  //let message = [0xb1,0x00]
+  const encoder = new TextEncoder();
+  let pkg = encoder.encode(data);
+  const msg = new Uint8Array(4 + pkg.length);
+  msg.set([0xb1, 0x00], 0);
+  const dv = new DataView(msg.buffer);
+  dv.setUint16(2, pkg.length, true);
+  msg.set(pkg, 4);
+  console.log("makeSetSettingMessage ", data, pkg.length);
+  return msg;
+}
+
 //Return uint8Array (size=400)
 function makeAtopInviteMessage() {
   const buffer = new Uint8Array(400);
@@ -117,7 +146,7 @@ function makeAtopInviteMessage() {
  * { command:byte, rw: 0x00|0x01, data: Uint8Array, motorID }roller package data or {} for other message
  *
  */
-function makeMessage(op, data) {
+function makeMessage(op: number, data: any) {
   switch (op) {
     case Op.atop_invite:
       return makeAtopInviteMessage();
@@ -129,6 +158,12 @@ function makeMessage(op, data) {
 
     case Op.config:
       return makeConfigMessage(data);
+
+    case Op.get_settings:
+      return makeGetSettingMessage();
+
+    case Op.set_settings:
+      return makeSetSettingMessage(data);
 
     case Op.json:
       return data;
@@ -196,7 +231,7 @@ const commandOption = [
 ];
 
 // [pkg] -> Number
-const getLength = pkg => pkg[1];
+const getLength = (pkg: Array<number> | Uint8Array): number => pkg[1];
 
 // a -> {value, text}
 // Retrurn commandOption['value'] = a
@@ -237,7 +272,7 @@ const getData = pkg => {
  * @param _pkg : (Array | Uint8Array) roller package
  * @returns {length, motorID, data, command, rw, commandText, string}
  */
-const parseRollerPackage = pkg => {
+const parseRollerPackage = (pkg: Array<number> | Uint8Array) => {
   const isUint8Array = R.is(Uint8Array);
   const _pkg = isUint8Array(pkg) ? Array.from(pkg) : pkg;
   const length = getLength(_pkg);
@@ -262,9 +297,9 @@ const parseRollerPackage = pkg => {
  * MessageParser.parse()
  */
 const MessageParser = {
-  isRollerMessage: msg => isRollerMessage(msg),
-  isJSONMessage: msg => isJSONMessage(msg),
-  parse: msg => {
+  isRollerMessage: (msg: Array<number> | Uint8Array) => isRollerMessage(msg),
+  isJSONMessage: (msg: Array<number> | Uint8Array) => isJSONMessage(msg),
+  parse: (msg: Array<number> | Uint8Array) => {
     if (isRollerMessage(msg)) {
       return { type: "roller", message: msg };
     } else {
@@ -276,7 +311,9 @@ const MessageParser = {
       }
     }
   },
-  valid: msg => isRollerMessage(msg) || isJSONMessage(msg)
+  valid: (msg: Array<number> | Uint8Array) => {
+    return isRollerMessage(msg) || isJSONMessage(msg);
+  }
 };
 
 export {
