@@ -10,12 +10,12 @@ import {
   makeMessage,
   useRollerPackage
 } from "libs/roller";
-import isEmpty from "ramda/src/isEmpty";
+
 import { useTCPSocket } from "libs/tcp/hooks";
 import { useAtopUDPMonitor } from "libs/udp/hooks";
 import ConnectRoller from "components/roller/ConnectRoller";
 import { Button, Typography } from "antd";
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 const RollerPackageTest = () => {
   const [packageOpt, packageHandlers] = useRollerPackage({});

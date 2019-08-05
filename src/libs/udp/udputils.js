@@ -1,5 +1,12 @@
 import { Observable } from "rxjs";
 import { filter, map, catchError } from "rxjs/operators";
+import {
+  MessageParser,
+  makeMessage,
+  DEFAULT_UDP_BROADCASTING_PORT,
+  Op
+} from "libs/roller/rollerutils";
+
 const electron = require("electron");
 const dgram = electron.remote.require("dgram");
 
@@ -75,4 +82,49 @@ function sendUDPMessage(message, ip, port = 5566) {
   });
 }
 
-export { getUdpObservable, jsonResponse, sendUDPMessage };
+function fetchRollers(): Promise<any> {
+  const message = makeMessage(Op.atop_invite);
+  //console.log("scan :", message);
+  require("electron").ipcRenderer.send("broadcasting", {
+    message,
+    port: DEFAULT_UDP_BROADCASTING_PORT
+  });
+
+  const client = dgram.createSocket({ type: "udp4", reuseAddr: true });
+  // console.log("response$ created bind port: ", initPort);
+  client.bind(55954);
+
+  return new Promise((resolve, reject) => {
+    client.on("error", err => {
+      reject(err);
+    });
+
+    const timeout_id = setTimeout(() => {
+      client.close();
+      reject(new Error("Time out!"));
+    }, 3000);
+
+    client.on("message", data => {
+      if (!MessageParser.valid(data)) return;
+
+      const msg = MessageParser.parse(data);
+
+      switch (msg.type) {
+        case "json":
+          const resItem = JSON.parse(msg.message);
+          if ("mac" in resItem) {
+            clearTimeout(timeout_id);
+            resolve(resItem);
+            client.close();
+          }
+          break;
+        case "roller":
+          break;
+        default:
+          break;
+      }
+    });
+  });
+}
+
+export { getUdpObservable, jsonResponse, sendUDPMessage, fetchRollers };

@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as yup from "yup";
 import "./formStyle.less";
-
+import type { tRollerSettings } from "libs/roller/rollerType";
 const defaultValue = {
   eoz: 0,
   pe: 1, //clear=1, block-0
@@ -11,7 +11,8 @@ const defaultValue = {
   currentSpeed: 1,
   jamExprTime: 4, //JAM timer expiration time
   rumExprTime: 4, // run timer expiration time
-  mode: 0 //Mode selection {Singulate, Slug, LongBox,...}
+  mode: 0, //Mode selection {Singulate, Slug, LongBox,...}
+  forceNeighborIP: 0
 };
 
 const ErrorDiv = props => (
@@ -58,21 +59,31 @@ const validator = yup.object().shape({
     .number()
     .required()
     .min(0)
-    .max(2)
+    .max(2),
+  forceNeighborIP: yup
+    .number()
+    .required()
+    .min(0)
+    .max(1)
 });
 
 type tProps = {
   onCancel: Function,
-  onValueChanged: Function
+  onValueChanged: Function,
+  rollerSetting: tRoller
 };
 
 const RollerSettingForm = (props: tProps) => {
-  const { onCancel, onValueChanged } = props;
-  const [settings, setSettings] = useState(defaultValue);
+  const { onCancel, onValueChanged, rollerSetting } = props;
+  const _settings = rollerSetting && rollerSetting.rollerSettings;
+  console.log("RollerSettingForm", props, _settings);
+  const [settings, setSettings] = useState(_settings);
+
   return (
     <div>
       <Formik
-        initialValues={defaultValue}
+        initialValues={_settings}
+        enableReinitialize={true}
         onSubmit={(values, actions) => {
           actions.setSubmitting(false);
           setSettings({ ...settings, ...values });
@@ -89,7 +100,7 @@ const RollerSettingForm = (props: tProps) => {
             </Field>
             <ErrorMessage name="eoz" component={ErrorDiv} />
 
-            <label for="pe">Photo eye : </label>
+            <label htmlFor="pe">Photo eye : </label>
             <Field name="pe" type="number" component="select">
               <option value={0}>Block</option>
               <option value={1}>Clear</option>
@@ -100,39 +111,51 @@ const RollerSettingForm = (props: tProps) => {
               component={ErrorDiv}
             />
 
-            <label for="halfSpeed">Half speed : </label>
+            <label htmlFor="halfSpeed">Half speed : </label>
             <Field name="halfSpeed" type="number" component="select">
               <option value={0}>Disable</option>
               <option value={1}>Enable</option>
             </Field>
             <ErrorMessage name="halfSpeed" component={ErrorDiv} />
 
-            <label for="speed">Char speed: </label>
+            <label htmlFor="speed">Char speed: </label>
             <Field name="speed" type="number" />
             <ErrorMessage name="speed" component={ErrorDiv} />
 
-            <label for="currentSpeed">Char current speed: </label>
+            <label htmlFor="currentSpeed">Char current speed: </label>
             <Field name="currentSpeed" type="number" />
             <ErrorMessage name="currentSpeed" component={ErrorDiv} />
 
-            <label for="jamExprTime">
+            <label htmlFor="jamExprTime">
               JAM timer expiration time (3~6 sec):{" "}
             </label>
             <Field name="jamExprTime" type="number" min={3} max={6} />
             <ErrorMessage name="jamExprTime" component={ErrorDiv} />
 
-            <label for="rumExprTime">
+            <label htmlFor="rumExprTime">
               Run timer expiration time (1~8 sec):{" "}
             </label>
             <Field name="rumExprTime" type="number" min={1} max={8} />
-
             <ErrorMessage name="rumExprTime" component={ErrorDiv} />
-            <label for="mode">Mode: </label>
+
+            <label htmlFor="mode">Mode: </label>
             <Field name="mode" component="select">
               <option value={0}>Singulate</option>
               <option value={1}>Slug</option>
               <option value={2}>LongBox</option>
             </Field>
+
+            <label htmlFor="forceNeighborIP"> Manual Set neighbor IP: </label>
+            <Field name="forceNeighborIP" type="checkbox" />
+
+            {/* {settings.forceNeighborIP === 1 ? (
+              <>
+                <label htmlFor="upperIP">Upper roller IP:</label>
+                <Field name="upperIP" type="text" />
+                <label htmlFor="lowerIP">Lower roller IP:</label>
+                <Field name="lowerIP" type="text" />
+              </>
+            ) : null} */}
 
             <button onClick={onCancel} className="btn_cancel">
               Cancel

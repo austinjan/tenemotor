@@ -3,6 +3,10 @@ const { app, BrowserWindow } = require("electron");
 const path = require("path");
 const isDev = require("electron-is-dev");
 const ipc = require("electron").ipcMain;
+const {
+  default: installExtension,
+  REACT_DEVELOPER_TOOLS
+} = require("electron-devtools-installer");
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -19,6 +23,10 @@ function createWindow() {
       // preload: "./preload.js"
     }
   });
+
+  installExtension(REACT_DEVELOPER_TOOLS)
+    .then(name => console.log(`Added Extension:  ${name}`))
+    .catch(err => console.log("An error occurred: ", err));
 
   // and load the index.html of the app.
   //mainWindow.loadFile('index.html')

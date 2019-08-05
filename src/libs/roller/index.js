@@ -5,7 +5,8 @@ export {
   test,
   MessageParser,
   makeRollerPackage,
-  parseRollerPackage
+  parseRollerPackage,
+  parseSettingMessages
 } from "./rollerutils";
 
 export {

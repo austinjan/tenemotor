@@ -3,7 +3,7 @@ import { Subject } from "rxjs";
 import { filter, tap } from "rxjs/operators";
 import * as R from "ramda";
 import { convertStringToByteArray } from "libs/udp/BinaryUtils";
-
+import type { tRollerSettings } from "./rollerType";
 export const DEFAULT_UDP_BROADCASTING_PORT = 55954;
 
 const Op = {
@@ -16,7 +16,7 @@ const Op = {
   config: 0x00
 };
 
-type tRollerSetting = {
+type tRollerCommand = {
   command: Number,
   rw: Number,
   data: Array<number> | Uint8Array,
@@ -29,7 +29,7 @@ type tRollerSetting = {
 
  * @returns roller package array
  */
-function makeRollerPackage(settings: tRollerSetting) {
+function makeRollerPackage(settings: tRollerCommand) {
   const settingWithDefault = R.mergeLeft(settings, {
     command: 0x00,
     rw: 0x01,
@@ -89,7 +89,7 @@ function makeConfigMessage(option) {
   buffer.set(gateway, 24); // gateway
   buffer.set(mac, 28); // mac
   buffer[70] = 0; // no Password
-  buffer.set(asciiToArray("hhadev"), 90); //host name
+  buffer.set(asciiToArray("any"), 90); //host name
   buffer.set(subnet, 236);
   buffer[236 + 19] = 0xff;
 
@@ -112,23 +112,129 @@ function makeRollerMessage(data, Left = true) {
   return new Uint8Array(message);
 }
 
-function makeGetSettingMessage() {}
+function makeGetSettingMessage() {
+  //let message = [0xb1,0x00]
 
+  const msg = new Uint8Array(4);
+  msg.set([0xb0, 0x00, 0x00, 0x00], 0);
+  // const dv = new DataView(msg.buffer);
+  // dv.setUint16(2, pkg.length, true);
+  // msg.set(pkg, 4);
+  // console.log("makeSetSettingMessage ", data, pkg.length);
+  return msg;
+}
+
+function toNum(x) {
+  var parsed = parseInt(x, 10);
+  if (isNaN(parsed)) {
+    return 0;
+  }
+  return parsed;
+}
+
+// [192.168.33.11] => "192.168.33.11"
+
+// "192.168.33.11" -> [192,168,33,11]
+const ip2array = R.compose(
+  R.map(toNum),
+  R.split(".")
+);
+
+const chksum = R.compose(
+  i => i & 0xffff,
+  R.reduce(R.add, 0)
+);
+
+const VERSION = 1;
+const PKGLENGTH = 56;
 /**
  * Make roller message for set settings in to roller.
  * @param {string} data json string of settings.
+ * Package
+ * [ eoz | pe | halfSpeed | speed | currentSpeed | jamExprTime | ramExprTime | mode |
+ * forceNeighborIP | upperIP.1 | upperIP.2 | upperIP.3 | upperIP.4 | downIP.1 | downIP.2 |
+ * downIP.3 | downIP.4 | eeyeTCPEvent | hostIP.1 | hostIP.2 | hostIP.3 | hostIP.4 |
+ * 0x00 0x00 (check sum 2 bytes) ]
  */
-function makeSetSettingMessage(data: string): Uint8Array {
-  //let message = [0xb1,0x00]
-  const encoder = new TextEncoder();
-  let pkg = encoder.encode(data);
-  const msg = new Uint8Array(4 + pkg.length);
-  msg.set([0xb1, 0x00], 0);
+function makeSetSettingMessage(data: tRollerSettings): Uint8Array {
+  const version = VERSION;
+  const pkglength = PKGLENGTH; //v1 package
+  const msg = new Uint8Array(4 + pkglength);
+  msg.set([0xb1, version], 0);
   const dv = new DataView(msg.buffer);
-  dv.setUint16(2, pkg.length, true);
-  msg.set(pkg, 4);
-  console.log("makeSetSettingMessage ", data, pkg.length);
+  dv.setUint16(2, pkglength, true);
+  // msg.set(pkg, 4);
+  // Package
+
+  dv.setUint32(4, data.eoz, true);
+  dv.setUint32(8, data.pe, true);
+  dv.setUint32(12, data.halfSpeed, true);
+  dv.setUint32(16, data.speed, true);
+  dv.setUint32(20, data.currentSpeed, true);
+  dv.setUint32(24, data.jamExprTime, true);
+  dv.setUint32(28, data.rumExprTime, true);
+  dv.setUint32(32, data.mode, true);
+  dv.setUint32(36, data.forceNeighborIP, true);
+  const upperIP = ip2array(data.upperIP || "0.0.0.0");
+  msg.set(upperIP, 40);
+  const lowerIP = ip2array(data.lowerIP || "0.0.0.0");
+  msg.set(lowerIP, 44);
+  dv.setUint32(48, data.eeyeTCPEvent, true);
+  const hostIP = ip2array(data.hostIP || "0.0.0.0");
+  msg.set(hostIP, 52);
+  const chkPkg = R.slice(4, 52, msg);
+  //checkSum
+  dv.setUint32(56, chksum(chkPkg), true);
+
   return msg;
+}
+
+function parseSettingMessages(msg: Uint8Array): any {
+  const version = VERSION;
+  const pkglength = PKGLENGTH; //v1 package
+  if (msg[0] !== 0xb0) {
+    //GET_SETTINGS
+    throw Error("Message Op code is not equal to 0xB0 : ", msg[0]);
+  }
+  msg.set([0xb1, version], 0);
+  const dv = new DataView(msg.buffer);
+  if (dv.getUint16(2, true) !== pkglength) {
+    throw Error("Package size invalid.");
+  }
+
+  let _settings = {};
+  // msg.set(pkg, 4);
+  // Package
+  _settings.eoz = dv.getUint32(4, true);
+  _settings.pe = dv.getUint32(8, true);
+  _settings.halfSpeed = dv.getUint32(12, true);
+  _settings.speed = dv.getUint32(16, true);
+  _settings.currentSpeed = dv.getUint32(20, true);
+  _settings.jamExprTime = dv.getUint32(24, true);
+  _settings.rumExprTime = dv.getUint32(28, true);
+  _settings.mode = dv.getUint32(32, true);
+  _settings.forceNeighborIP = dv.getUint32(36, true);
+  _settings.upperIP = R.compose(
+    R.join("."),
+    R.slice(40, 44)
+  )(msg);
+  _settings.lowerIP = R.compose(
+    R.join("."),
+    R.slice(44, 48)
+  )(msg);
+  _settings.eeyeTCPEvent = dv.getUint32(48, true);
+  _settings.hostIP = R.compose(
+    R.join("."),
+    R.slice(52, 56)
+  )(msg);
+
+  const chkPkg = R.slice(4, 52, msg);
+  //checkSum
+  const chkSum = dv.getUint32(56, true);
+  const calChksum = chksum(chkPkg);
+  console.log("chkSum = ", chkSum, " calChkSum = ", calChksum);
+
+  return chkSum === calChksum ? _settings : {};
 }
 
 //Return uint8Array (size=400)
@@ -146,7 +252,7 @@ function makeAtopInviteMessage() {
  * { command:byte, rw: 0x00|0x01, data: Uint8Array, motorID }roller package data or {} for other message
  *
  */
-function makeMessage(op: number, data: any) {
+function makeMessage(op: number, data: any): Uint8Array {
   switch (op) {
     case Op.atop_invite:
       return makeAtopInviteMessage();
@@ -322,5 +428,6 @@ export {
   test,
   MessageParser,
   makeRollerPackage,
-  parseRollerPackage
+  parseRollerPackage,
+  parseSettingMessages
 };

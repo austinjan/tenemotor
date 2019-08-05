@@ -5,10 +5,8 @@ import { Table, Button, Divider } from "antd";
 
 const { Column } = Table;
 
-const EditableCell = () => {};
-
 const RollerTable = props => {
-  const { rollers, onConnect, onSetting } = props;
+  const { rollers, onConnect } = props;
   //const arraySize = Array.isArray(rollers) && rollers.length;
 
   return (
@@ -31,16 +29,9 @@ const RollerTable = props => {
                   onConnect(record);
                 }}
               >
-                Connect
+                Select
               </Button>
               <Divider type="vertical" />
-              <Button
-                onClick={() => {
-                  onSetting(record);
-                }}
-              >
-                Setting
-              </Button>
             </span>
           )}
         />

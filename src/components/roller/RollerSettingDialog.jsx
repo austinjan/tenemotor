@@ -1,7 +1,8 @@
 // @flow
 import React from "react";
-
+import type { tRoller } from "libs/roller/rollerType";
 import { Modal, Tabs } from "antd";
+// $FlowFixMe
 import "./NetworkingSettings.less";
 
 import NetworkingSettingForm from "components/form/NetworkingSettingForm";
@@ -9,11 +10,18 @@ import RollerSettingForm from "components/form/RollerSettingForm";
 
 const { TabPane } = Tabs;
 
+type tProps = {
+  rollerSettings: tRoller,
+  visible: boolean,
+  onCancel: Function,
+  onNetworkingChanged: Function,
+  onRollerSettingsChanged: Function
+};
 /**
  * Setting roller
  * @param {*} props ={rollerSettings, visible, onCancel, onValueChanged }
  */
-const RollerSettingDialog = props => {
+const RollerSettingDialog = (props: tProps) => {
   const {
     rollerSettings,
     visible,
@@ -27,13 +35,14 @@ const RollerSettingDialog = props => {
       visible={visible}
       title="Roller settings"
       okText="Ok"
-      style={{ width: "80%" }}
+      width={700}
       footer={null}
       onCancel={onCancel}
     >
       <Tabs defaultActiveKey="1">
         <TabPane tab="Roller Settings" key="1">
           <RollerSettingForm
+            rollerSetting={rollerSettings}
             onCancel={onCancel}
             onValueChanged={onRollerSettingsChanged}
           />

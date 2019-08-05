@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useReducer } from "react";
+import React, { useEffect, useReducer } from "react";
 import { Subject, of } from "rxjs";
-import { mergeMap, delay, tap } from "rxjs/operators";
+import { mergeMap, delay } from "rxjs/operators";
 
 const reducer = (state, action) => {
   switch (action.type) {
