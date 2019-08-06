@@ -91,10 +91,13 @@ function fetchRollers(): Promise<any> {
   });
 
   const client = dgram.createSocket({ type: "udp4", reuseAddr: true });
-  // console.log("response$ created bind port: ", initPort);
-  client.bind(55954);
 
   return new Promise((resolve, reject) => {
+    try {
+      client.bind(55954);
+    } catch (err) {
+      reject(err);
+    }
     client.on("error", err => {
       reject(err);
     });

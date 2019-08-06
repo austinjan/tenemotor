@@ -41,6 +41,9 @@ const RollerSelector = (props: tProps) => {
   const [showInfo, setShowInfo] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [currentRoller, setCurrentRoller] = useState({});
+  const [helpText, setHelpText] = useState(
+    "Press search button to scan rollers.."
+  );
   const [rollers, dispatchRollers] = useReducer(rollerReducer, []);
   const [
     settingRollers,
@@ -58,6 +61,7 @@ const RollerSelector = (props: tProps) => {
         updateRollerByMac(data);
         dispatchRollers({ type: "INVITE", payload: data });
         setShowTable(true);
+        setHelpText("Select roller...");
       })
       .catch(err => {
         console.log("fetchRollers error : ", err);
@@ -119,12 +123,12 @@ const RollerSelector = (props: tProps) => {
   return (
     <div>
       <RollerSelectBar
-        showInfo={showInfo}
         showTable={showTable}
         onScan={handleScan}
         onSetting={handleSetting}
         toggleShowTable={handleToggleTable}
         toggleInfo={handleToggleInfo}
+        helpText={helpText}
         {...currentRoller}
       />
       {showInfo ? <RollerInformation {...currentRoller} /> : null}

@@ -85,16 +85,16 @@ const NetworkingSettingForm = (props: tProps) => {
             <label> Name : </label>
             <Field name="name" type="text" />
             <ErrorMessage name="name" component={ErrorDiv} />
-            <label for="ip">IP Address : </label>
+            <label htmlFor="ip">IP Address : </label>
             <Field name="ip" type="text" />
             <ErrorMessage name="ip" component={ErrorDiv} />
-            <label for="subnet">Subnet Mask : </label>
+            <label htmlFor="subnet">Subnet Mask : </label>
             <Field name="subnet" type="text" />
             <ErrorMessage name="subnet" component={ErrorDiv} />
-            <label for="gateway">Gateway : </label>
+            <label htmlFor="gateway">Gateway : </label>
             <Field name="gateway" type="text" />
             <ErrorMessage name="gateway" component={ErrorDiv} />
-            <label for="host">Host : </label>
+            <label htmlFor="host">Host : </label>
             <Field name="host" type="text" />
             <ErrorMessage name="host" component={ErrorDiv} />
             <Button onClick={onCancel} className="btn_cancel">

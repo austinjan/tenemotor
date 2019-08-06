@@ -1,19 +1,20 @@
-import React, { useState, useEffect } from "react";
+import { Checkbox } from "antd";
+import React, { useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as yup from "yup";
 import "./formStyle.less";
-import type { tRollerSettings } from "libs/roller/rollerType";
-const defaultValue = {
-  eoz: 0,
-  pe: 1, //clear=1, block-0
-  halfSpeed: 0, //disable
-  speed: 1,
-  currentSpeed: 1,
-  jamExprTime: 4, //JAM timer expiration time
-  rumExprTime: 4, // run timer expiration time
-  mode: 0, //Mode selection {Singulate, Slug, LongBox,...}
-  forceNeighborIP: 0
-};
+
+// const defaultValue = {
+//   eoz: 0,
+//   pe: 1, //clear=1, block-0
+//   halfSpeed: 0, //disable
+//   speed: 1,
+//   currentSpeed: 1,
+//   jamExprTime: 4, //JAM timer expiration time
+//   rumExprTime: 4, // run timer expiration time
+//   mode: 0, //Mode selection {Singulate, Slug, LongBox,...}
+//   forceNeighborIP: 0
+// };
 
 const ErrorDiv = props => (
   <div className="entire_row" style={{ color: "red" }}>
@@ -64,6 +65,20 @@ const validator = yup.object().shape({
     .number()
     .required()
     .min(0)
+    .max(1),
+  upperIP: yup
+    .string()
+    .matches(/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/, "Invalid ip address."),
+  lowerIP: yup
+    .string()
+    .matches(/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/, "Invalid ip address."),
+  hostIP: yup
+    .string()
+    .matches(/^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/, "Invalid ip address."),
+  eeyeTCPEvent: yup
+    .number()
+    .required()
+    .min(0)
     .max(1)
 });
 
@@ -76,8 +91,14 @@ type tProps = {
 const RollerSettingForm = (props: tProps) => {
   const { onCancel, onValueChanged, rollerSetting } = props;
   const _settings = rollerSetting && rollerSetting.rollerSettings;
-  console.log("RollerSettingForm", props, _settings);
+
   const [settings, setSettings] = useState(_settings);
+  const [showNeiborIPSettings, setShowNeiborIPSettings] = useState(
+    _settings.forceNeighborIP === 1
+  );
+  const [showHostIPSettings, setShowHostIPSettings] = useState(
+    _settings.eeyeTCPEvent === 1
+  );
 
   return (
     <div>
@@ -91,7 +112,7 @@ const RollerSettingForm = (props: tProps) => {
         }}
         validationSchema={validator}
       >
-        {({ errors, touched }) => (
+        {({ errors, touched, setFieldValue, values }) => (
           <Form className="form-inline">
             <label>End of Zone : </label>
             <Field name="eoz" type="number" component="select">
@@ -145,17 +166,44 @@ const RollerSettingForm = (props: tProps) => {
               <option value={2}>LongBox</option>
             </Field>
 
-            <label htmlFor="forceNeighborIP"> Manual Set neighbor IP: </label>
-            <Field name="forceNeighborIP" type="checkbox" />
+            <Checkbox
+              checked={values.forceNeighborIP}
+              onChange={event => {
+                setFieldValue("forceNeighborIP", event.target.checked ? 1 : 0);
+                setShowNeiborIPSettings(event.target.checked);
+              }}
+            >
+              Manual Set neighbor IP
+            </Checkbox>
 
-            {/* {settings.forceNeighborIP === 1 ? (
+            {showNeiborIPSettings ? (
               <>
                 <label htmlFor="upperIP">Upper roller IP:</label>
                 <Field name="upperIP" type="text" />
+                <ErrorMessage name="upperIP" component={ErrorDiv} />
                 <label htmlFor="lowerIP">Lower roller IP:</label>
                 <Field name="lowerIP" type="text" />
+                <ErrorMessage name="lowerIP" component={ErrorDiv} />
               </>
-            ) : null} */}
+            ) : null}
+
+            <Checkbox
+              checked={values.eeyeTCPEvent}
+              onChange={event => {
+                setFieldValue("eeyeTCPEvent", event.target.checked ? 1 : 0);
+                setShowHostIPSettings(event.target.checked);
+              }}
+            >
+              Enable e-eye tcp event
+            </Checkbox>
+
+            {showHostIPSettings ? (
+              <>
+                <label htmlFor="hostIP">Event destination: </label>
+                <Field name="hostIP" type="text" />
+                <ErrorMessage name="hostIP" component={ErrorDiv} />
+              </>
+            ) : null}
 
             <button onClick={onCancel} className="btn_cancel">
               Cancel

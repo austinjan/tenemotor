@@ -1,5 +1,5 @@
 // @flow
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Divider, Icon } from "antd";
 // $FlowFixMe
 import "./RollerSelector.less";
@@ -9,7 +9,7 @@ type tProps = {
   ip?: string,
   mac?: string,
   showTable: boolean,
-  showInfo: boolean,
+  helpText: string,
   onScan: Function,
   onSetting: Function,
   toggleShowTable: Function,
@@ -24,7 +24,7 @@ const RollerSelectBar = (props: tProps) => {
     ip,
     mac,
     showTable,
-    showInfo,
+    helpText,
     onScan,
     onSetting,
     toggleShowTable,
@@ -32,36 +32,52 @@ const RollerSelectBar = (props: tProps) => {
   } = props;
   const displayName = name || "Undefined";
 
+  const [bindRoller, setBindRoller] = useState(false);
+  const ipValidator = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
+  useEffect(() => {
+    setBindRoller(ipValidator.test(ip));
+  }, [ip, ipValidator]);
   return (
     <div className="ui__bar">
-      <span>{displayName}</span> <Divider type="vertical" />
-      <span>{ip}</span>
-      <Divider type="vertical" />
-      <span className="bar_anchor">{mac}</span>
+      {bindRoller ? (
+        <>
+          <span>{displayName}</span> <Divider type="vertical" />
+          <span>{ip}</span>
+          <Divider type="vertical" />
+          <span className="bar_anchor">{mac}</span>
+        </>
+      ) : (
+        <span className="bar_anchor"> {helpText} </span>
+      )}
       <Button className="btn" shape="circle" onClick={onScan} size="small">
         <Icon type="search" />
       </Button>
-      <Button
-        className="btn"
-        shape="circle"
-        icon="setting"
-        size="small"
-        onClick={onSetting}
-      />
-      <Button
-        className="btn"
-        shape="circle"
-        icon={showTable ? "caret-up" : "caret-down"}
-        size="small"
-        onClick={toggleShowTable}
-      />
-      <Button className="btn" shape="circle" size="small" onClick={toggleInfo}>
-        <Icon
-          type="more"
-          theme="twoTone"
-          twoToneColor={showInfo ? "#3333ff" : "#b3b3b3"}
-        />
-      </Button>
+      {bindRoller ? (
+        <>
+          <Button
+            className="btn"
+            shape="circle"
+            icon="setting"
+            size="small"
+            onClick={onSetting}
+          />
+          <Button
+            className="btn"
+            shape="circle"
+            icon={showTable ? "caret-up" : "caret-down"}
+            size="small"
+            onClick={toggleShowTable}
+          />
+          <Button
+            className="btn"
+            shape="circle"
+            size="small"
+            onClick={toggleInfo}
+          >
+            <Icon type="more" />
+          </Button>
+        </>
+      ) : null}
     </div>
   );
 };

@@ -16,7 +16,8 @@ const RollerInformaion = (props: tRoller): Node => {
         <Descriptions
           title="Networking arguments"
           bordered
-          column={{ xxl: 4, xl: 3, lg: 3, md: 3, sm: 2, xs: 1 }}
+          size="small"
+          column={{ xxl: 3, xl: 2, lg: 2, md: 2, sm: 1, xs: 1 }}
         >
           <Descriptions.Item label="Name">{props.name}</Descriptions.Item>
           <Descriptions.Item label="IP">{props.ip}</Descriptions.Item>
