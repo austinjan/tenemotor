@@ -33,7 +33,7 @@ const RollerInformaion = (props: tRoller): Node => {
         <Descriptions
           title="Roller arguments"
           bordered
-          column={{ xxl: 4, xl: 3, lg: 3, md: 3, sm: 2, xs: 1 }}
+          column={{ xxl: 3, xl: 2, lg: 2, md: 2, sm: 1, xs: 1 }}
         >
           <Descriptions.Item label="Upper roller IP">
             {rollerSettings.upperIP}
@@ -67,6 +67,28 @@ const RollerInformaion = (props: tRoller): Node => {
           </Descriptions.Item>
         </Descriptions>
       )}
+      {rollerSettings.forceNeighborIP === 1 ? (
+        <Descriptions
+          title="Neighbor IPs"
+          bordered
+          column={{ xxl: 2, xl: 2, lg: 2, md: 1, sm: 1, xs: 1 }}
+        >
+          <Descriptions.Item label="IP of upper">
+            {rollerSettings.upperIP}
+          </Descriptions.Item>
+          <Descriptions.Item label="IP of lower">
+            {rollerSettings.lowerIP}
+          </Descriptions.Item>
+        </Descriptions>
+      ) : null}
+
+      {rollerSettings.eeyeTCPEvent === 1 ? (
+        <Descriptions title="E-eye tcp event" bordered column={1}>
+          <Descriptions.Item label="Host">
+            {rollerSettings.hostIP}
+          </Descriptions.Item>
+        </Descriptions>
+      ) : null}
     </div>
   );
 };
