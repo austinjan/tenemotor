@@ -2,7 +2,8 @@
 import { Subject } from "rxjs";
 import { filter, tap } from "rxjs/operators";
 import * as R from "ramda";
-import { convertStringToByteArray } from "libs/udp/BinaryUtils";
+
+import { makeRollerPackage } from "./rollerCommands";
 import type { tRollerSettings } from "./rollerType";
 export const DEFAULT_UDP_BROADCASTING_PORT = 55954;
 
@@ -15,47 +16,6 @@ const Op = {
   set_settings: 0xb1,
   config: 0x00
 };
-
-type tRollerCommand = {
-  command: Number,
-  rw: Number,
-  data: Array<number> | Uint8Array,
-  motorID: Number
-};
-/**
- * {command,rw,data,motoID} -> [Package]
- * @description Make package will send to Tene roller control card.
- * @param {object} settings {command:byte, rw: 0x00|0x01, data: Uint8Array, motorID}
-
- * @returns roller package array
- */
-function makeRollerPackage(settings: tRollerCommand) {
-  const settingWithDefault = R.mergeLeft(settings, {
-    command: 0x00,
-    rw: 0x01,
-    // $FlowFixMe
-    data: new Uint8Array(),
-    motorID: 0
-  });
-
-  const { command, rw, data, motorID } = settingWithDefault;
-  const _data = R.is(String, data) ? convertStringToByteArray(data) : data;
-  const rwField = (rw & 0x0f) | ((motorID & 0x0f) << 4);
-  let length = _data.length || 0;
-  length += 2;
-  let rawPackage = [0x55, length, command, rwField];
-  let checkSum = 0;
-  checkSum += command;
-  checkSum += rwField;
-  _data.forEach(v => {
-    rawPackage.push(v);
-    checkSum += v;
-  });
-  rawPackage.push(checkSum & 255);
-  rawPackage.push(0x00);
-
-  return rawPackage;
-}
 
 // asciiToArray('abc') =>
 const asciiToArray = R.flip(R.invoker(1, "encode"))(new TextEncoder());
@@ -381,6 +341,17 @@ const getData = pkg => {
 const parseRollerPackage = (pkg: Array<number> | Uint8Array) => {
   const isUint8Array = R.is(Uint8Array);
   const _pkg = isUint8Array(pkg) ? Array.from(pkg) : pkg;
+  if (_pkg[0] !== 0x55)
+    return {
+      length: 0,
+      motorID: 0,
+      rw: 0,
+      data: [0],
+      commandText: "0",
+      command: 0,
+      string: "0",
+      checkSum: 0
+    };
   const length = getLength(_pkg);
   const RWField = R.compose(
     splitRWField,
@@ -392,9 +363,19 @@ const parseRollerPackage = (pkg: Array<number> | Uint8Array) => {
   const commandText = getCommandText(_pkg);
   const command = getCommand(_pkg);
   const tostr = v => " 0x" + v.toString(16);
-  const string = R.map(tostr)(_pkg);
+  const hexstring = R.map(tostr)(_pkg);
   const checkSum = _pkg[getLength(_pkg) + 2];
-  return { length, motorID, rw, data, commandText, command, string, checkSum };
+
+  return {
+    length,
+    motorID,
+    rw,
+    data,
+    commandText,
+    command,
+    packageHexString: hexstring,
+    checkSum
+  };
 };
 
 /**

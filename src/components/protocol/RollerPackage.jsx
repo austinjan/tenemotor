@@ -73,6 +73,7 @@ const RollerPackage = props => {
   );
 
   useEffect(() => {
+    console.log("RollerPackage useEffect");
     setParsedPackage(parseRollerPackage(rollerPackage));
   }, [rollerPackage]);
 
@@ -85,7 +86,7 @@ const RollerPackage = props => {
             The op code of roller control card is 0xA0. Package please refer
             below.
           </Paragraph>
-          <Text code>Raw Package: [ {parsedPackage.string} ]</Text>
+          <Text code>Raw Package: [ {parsedPackage.packageHexString} ]</Text>
         </>
       ) : null}
 

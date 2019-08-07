@@ -58,6 +58,7 @@ const useTCPSocket = target => {
       }
 
       socket.current.on("data", rev => {
+        if (rev[0] === 82) return;
         console.log("tcp onData : ", rev);
         const hexString = rev.reduce(
           (memo, i) => memo + " 0x" + ("0" + i.toString(16)).slice(-2),

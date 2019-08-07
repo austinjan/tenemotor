@@ -1,13 +1,7 @@
 import React from "react";
 import { Typography, Row, Col } from "antd";
 import RollerControlPanel from "./RollerCongrolPanel";
-// import Collapse from "components/layout/Collapse";
-// import RollerTable from "components/roller/RollerTable";
-// import ConnectAlert from "components/roller/ConnectionAlert";
-// import RollerSettingDialog from "components/roller/RollerSettingDialog";
 import RollerSelector from "components/roller/RollerSelector";
-// import isEmpty from "ramda/src/isEmpty";
-// import map from "ramda/src/map";
 
 import "App.less";
 // import { parseRollerPackage, MessageParser } from "libs/roller";
@@ -101,21 +95,12 @@ const RollerControl = props => {
 
       <Row gutter={16} style={{ marginTop: "16px" }}>
         <Col span={12}>
-          <RollerControlPanel title="Left" />
+          <RollerControlPanel title="Upper" />
         </Col>
         <Col span={12}>
-          <RollerControlPanel title="Right" />
+          <RollerControlPanel title="Lower" />
         </Col>
       </Row>
-
-      {/* <RollerSettingDialog
-        visible={showSettings}
-        onOk={handleSettingsOk}
-        onCancel={handleSettingsCancel}
-        rollerSettings={selectedRoller}
-        onNetworkingChanged={handleNetworkingSettingChanged}
-        onRollerSettingsChanged={handleRollerSettingsChanged}
-      /> */}
     </div>
   );
 };

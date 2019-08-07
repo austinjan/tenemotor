@@ -28,9 +28,36 @@ type tRollerSettings = {
   mode: number //Mode selection {Singulate, Slug, LongBox,...}
 };
 
+/**
+ * Read status from MCU
+ */
+type tRollerReadCommand = {
+  phaseCurrent: number,
+  motorPeriod: number,
+  cardTemperature: number,
+  fuzzy: number,
+  motorSpeed: number,
+  gpioStatus: number,
+  params: number,
+  uartHall: number
+};
+
+type tRollerPackageArg = {
+  command: number,
+  rw: number,
+  data: Array<number> | Uint8Array,
+  motorID: number
+};
+
 type tRoller = {
   ...tRollerGeneral,
   rollerSettings: ?tRollerSettings
 };
 
-export type { tRollerGeneral, tRollerSettings, tRoller };
+export type {
+  tRollerGeneral,
+  tRollerSettings,
+  tRollerReadCommand,
+  tRollerPackageArg,
+  tRoller
+};
