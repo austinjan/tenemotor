@@ -1,6 +1,6 @@
 // @flow
 
-import type { tRollerPackageArg, tRollerReadCommand } from "./rollerType";
+import type { tRollerPackageArg } from "./rollerType";
 import { convertStringToByteArray } from "libs/udp/BinaryUtils";
 import * as R from "ramda";
 
@@ -25,6 +25,10 @@ const array2Num = indexReduce((acc, v, idx) => {
   return acc | (v << (idx * 8));
 });
 
+/**
+ * [0,1] => 256
+ * @param {Array | Uint8Array} buffer 
+ */
 const bigEndian2Number = buffer => {
   try {
     return array2Num(buffer);
