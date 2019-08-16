@@ -3,6 +3,11 @@ import { makeMessage, Op } from "libs/roller";
 
 const net = require("electron").remote.require("net");
 
+/**
+ * Fetch roller settings.
+ * @param {string} ip Roller ip address.
+ * @returns {Promise} Response
+ */
 function fetchSettings(ip: string): Promise<any> {
   const socket = new net.Socket();
   socket.connect(5566, ip, () => {
@@ -25,6 +30,12 @@ function fetchSettings(ip: string): Promise<any> {
   });
 }
 
+/**
+ * Send msg to ip by tcp socket
+ * @param {string} ip ip4 address
+ * @param {string} msg message want to send
+ * @returns {Promise} Response
+ */
 function sendTo(ip: string, msg: Uint8Array): Promise<any> {
   const socket = new net.Socket();
   socket.connect(5566, ip, () => {

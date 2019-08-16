@@ -5,7 +5,7 @@ import { Table, Button, Divider } from "antd";
 
 const { Column } = Table;
 
-const RollerTable = props => {
+const RollerTable = (props: { rollers: Object, onConnect: Function }) => {
   const { rollers, onConnect } = props;
   //const arraySize = Array.isArray(rollers) && rollers.length;
 

@@ -1,20 +1,25 @@
 import { Checkbox } from "antd";
 import React, { useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
+import mergeLeft from "ramda/src/mergeLeft";
 import * as yup from "yup";
 import "./formStyle.less";
 
-// const defaultValue = {
-//   eoz: 0,
-//   pe: 1, //clear=1, block-0
-//   halfSpeed: 0, //disable
-//   speed: 1,
-//   currentSpeed: 1,
-//   jamExprTime: 4, //JAM timer expiration time
-//   rumExprTime: 4, // run timer expiration time
-//   mode: 0, //Mode selection {Singulate, Slug, LongBox,...}
-//   forceNeighborIP: 0
-// };
+const defaultValue = {
+  eoz: 0,
+  pe: 1, //clear=1, block-0
+  halfSpeed: 0, //disable
+  speed: 1,
+  currentSpeed: 1,
+  jamExprTime: 4, //JAM timer expiration time
+  rumExprTime: 4, // run timer expiration time
+  mode: 0, //Mode selection {Singulate, Slug, LongBox,...}
+  forceNeighborIP: 0,
+  upperIP: "",
+  lowerIP: "",
+  eeyeTCPEvent: 0, //disable=0 enable=1
+  hostIP: ""
+};
 
 const ErrorDiv = props => (
   <div className="entire_row" style={{ color: "red" }}>
@@ -90,8 +95,8 @@ type tProps = {
 
 const RollerSettingForm = (props: tProps) => {
   const { onCancel, onValueChanged, rollerSetting } = props;
-  const _settings = rollerSetting && rollerSetting.rollerSettings;
-
+  const temp = rollerSetting && rollerSetting.rollerSettings;
+  const _settings = mergeLeft(temp, defaultValue);
   const [settings, setSettings] = useState(_settings);
   const [showNeiborIPSettings, setShowNeiborIPSettings] = useState(
     _settings.forceNeighborIP === 1

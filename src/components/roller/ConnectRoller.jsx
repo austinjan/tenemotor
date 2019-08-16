@@ -13,7 +13,7 @@ import isEmpty from "ramda/src/isEmpty";
  */
 
 type Props = {
-  onConnect: ({}) => {},
+  onConnect: Function,
   rollers: [{ ip: String, mac: String }]
 };
 

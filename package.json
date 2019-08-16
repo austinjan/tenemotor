@@ -33,8 +33,8 @@
   "homepage": "./",
   "dependencies": {
     "antd": "*",
-    "electron-devtools-installer": "^2.2.4",
     "broadcast-address": "^1.0.2",
+    "electron-devtools-installer": "^2.2.4",
     "electron-is-dev": "^1.1.0",
     "flow-bin": "^0.103.0",
     "formik": "^1.5.8",
@@ -61,6 +61,7 @@
     "concurrently": "^4.1.0",
     "electron": "^5.0.1",
     "electron-builder": "^20.39.0",
+    "electron-rebuild": "^1.8.5",
     "eslint": "^5.16.0",
     "eslint-plugin-react": "^7.13.0",
     "less": "^3.9.0",

@@ -35,7 +35,9 @@ const RollerSelectBar = (props: tProps) => {
   const [bindRoller, setBindRoller] = useState(false);
   const ipValidator = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
   useEffect(() => {
-    setBindRoller(ipValidator.test(ip));
+    typeof ip === "string"
+      ? setBindRoller(ipValidator.test(ip))
+      : setBindRoller(false);
   }, [ip, ipValidator]);
   return (
     <div className="ui__bar">

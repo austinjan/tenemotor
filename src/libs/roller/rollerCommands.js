@@ -27,7 +27,7 @@ const array2Num = indexReduce((acc, v, idx) => {
 
 /**
  * [0,1] => 256
- * @param {Array | Uint8Array} buffer 
+ * @param {Array | Uint8Array} buffer
  */
 const bigEndian2Number = buffer => {
   try {
@@ -45,7 +45,7 @@ const bigEndian2Number = buffer => {
 
  * @returns roller package array
  */
-function makeRollerPackage(settings: tRollerPackageArg) {
+function makeRollerPackage(settings: tRollerPackageArg | {}) {
   const settingWithDefault = R.mergeLeft(settings, {
     command: 0x00,
     rw: 0x01,

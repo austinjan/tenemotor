@@ -149,12 +149,12 @@ function makeSetSettingMessage(data: tRollerSettings): Uint8Array {
   return msg;
 }
 
-function parseSettingMessages(msg: Uint8Array): any {
+function parseSettingMessages(msg: Uint8Array): Object {
   const version = VERSION;
   const pkglength = PKGLENGTH; //v1 package
   if (msg[0] !== 0xb0) {
     //GET_SETTINGS
-    throw Error("Message Op code is not equal to 0xB0 : ", msg[0]);
+    throw Error("Message Op code is not equal to 0xB0 : ");
   }
   msg.set([0xb1, version], 0);
   const dv = new DataView(msg.buffer);

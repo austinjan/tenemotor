@@ -6,17 +6,17 @@
 type tRollerGeneral = {
   ip: string,
   mac: string,
-  name: ?string,
-  subnet: ?string,
-  gateway: ?string,
-  host?: string
+  name: string,
+  subnet: string,
+  gateway: string,
+  host: string
 };
 
 type tRollerSettings = {
   upperIP: ?string,
   lowerIP: ?string,
-  forceNeighborIP: ?number, //none=0 yse=1
-  eeyeTCPEvent: ?number, //disable=0 enable=1
+  forceNeighborIP: number, //none=0 yse=1
+  eeyeTCPEvent: number, //disable=0 enable=1
   hostIP: ?string,
   eoz: number,
   pe: number, //clear=1, block-0
@@ -49,9 +49,8 @@ type tRollerPackageArg = {
   motorID: number
 };
 
-type tRoller = {
-  ...tRollerGeneral,
-  rollerSettings: ?tRollerSettings
+type tRoller = tRollerGeneral & {
+  rollerSettings: tRollerSettings
 };
 
 export type {
