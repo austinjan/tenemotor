@@ -42,7 +42,7 @@ const RollerSelector = (props: tProps) => {
   const [showInfo, setShowInfo] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [currentRoller, setCurrentRoller] = useState({});
-  const [Alert, displayInfo, displayError, hideAlert] = useAlert();
+  const [MyAlert, displayInfo, displayError, hideAlert] = useAlert();
   const [helpText, setHelpText] = useState(
     "Press search button to scan rollers.."
   );
@@ -154,7 +154,7 @@ const RollerSelector = (props: tProps) => {
         helpText={helpText}
         {...currentRoller}
       />
-      {Alert}
+      {MyAlert}
       {showInfo ? <RollerInformation {...currentRoller} /> : null}
       {Table}
 
