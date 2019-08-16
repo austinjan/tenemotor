@@ -8,6 +8,7 @@ import type { tRoller } from "libs/roller/rollerType";
 import { fetchSettings, sendTo } from "libs/tcp";
 import { fetchRollers } from "libs/udp";
 import { useRollers, makeMessage, Op, parseSettingMessages } from "libs/roller";
+import { useAlert } from "components/utils";
 // $FlowFixMe
 import "./RollerSelector.less";
 
@@ -41,6 +42,7 @@ const RollerSelector = (props: tProps) => {
   const [showInfo, setShowInfo] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [currentRoller, setCurrentRoller] = useState({});
+  const [Alert, displayInfo, displayError, hideAlert] = useAlert();
   const [helpText, setHelpText] = useState(
     "Press search button to scan rollers.."
   );
@@ -54,6 +56,7 @@ const RollerSelector = (props: tProps) => {
 
   const handleScan = () => {
     console.log("handleScan");
+    displayInfo("Scanning.....");
     fetchRollers()
       .then(data => {
         console.log("fetchRoller -> ", data);
@@ -63,18 +66,25 @@ const RollerSelector = (props: tProps) => {
             updateRollerByMac(roller);
             dispatchRollers({ type: "INVITE", payload: roller });
           });
-          setShowTable(true);
-          setHelpText("Select roller...");
+          if (data.length > 0) {
+            setShowTable(true);
+            setHelpText("Select roller...");
+            hideAlert();
+          } else {
+            displayError("No roller found..");
+          }
         } else {
           data.key = data.mac;
           updateRollerByMac(data);
           dispatchRollers({ type: "INVITE", payload: data });
           setShowTable(true);
           setHelpText("Select roller...");
+          hideAlert();
         }
       })
       .catch(err => {
         console.log("fetchRollers error : ", err);
+        displayError(err);
       });
   };
 
@@ -114,9 +124,12 @@ const RollerSelector = (props: tProps) => {
   const handleRollerSettingsChanged = settings => {
     console.log("handleRollerSettingsChanged ", settings, currentRoller);
     const msg = makeMessage(Op.set_settings, settings);
-    sendTo(currentRoller.ip, msg)
-      .then(data => console.log("TCP response ", data))
-      .catch(err => console.log("Fetch Settings error: ", err));
+    if (currentRoller.ip) {
+      sendTo(currentRoller.ip, msg)
+        .then(data => console.log("TCP response ", data))
+        .catch(err => console.log("Fetch Settings error: ", err));
+    } else {
+    }
   };
 
   const handleSettingsCancel = () => {
@@ -141,6 +154,7 @@ const RollerSelector = (props: tProps) => {
         helpText={helpText}
         {...currentRoller}
       />
+      {Alert}
       {showInfo ? <RollerInformation {...currentRoller} /> : null}
       {Table}
 
