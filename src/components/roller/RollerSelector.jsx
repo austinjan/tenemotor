@@ -57,11 +57,21 @@ const RollerSelector = (props: tProps) => {
     fetchRollers()
       .then(data => {
         console.log("fetchRoller -> ", data);
-        data.key = data.mac;
-        updateRollerByMac(data);
-        dispatchRollers({ type: "INVITE", payload: data });
-        setShowTable(true);
-        setHelpText("Select roller...");
+        if (Array.isArray(data)) {
+          data.map(roller => {
+            roller.key = roller.mac;
+            updateRollerByMac(roller);
+            dispatchRollers({ type: "INVITE", payload: roller });
+          });
+          setShowTable(true);
+          setHelpText("Select roller...");
+        } else {
+          data.key = data.mac;
+          updateRollerByMac(data);
+          dispatchRollers({ type: "INVITE", payload: data });
+          setShowTable(true);
+          setHelpText("Select roller...");
+        }
       })
       .catch(err => {
         console.log("fetchRollers error : ", err);

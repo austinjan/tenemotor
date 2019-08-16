@@ -93,6 +93,7 @@ function fetchRollers(): Promise<any> {
   const client = dgram.createSocket({ type: "udp4", reuseAddr: true });
 
   return new Promise((resolve, reject) => {
+    const responses = [];
     try {
       client.bind(55954);
     } catch (err) {
@@ -102,10 +103,10 @@ function fetchRollers(): Promise<any> {
       reject(err);
     });
 
-    const timeout_id = setTimeout(() => {
+    setTimeout(() => {
+      resolve(responses);
       client.close();
-      reject(new Error("Time out!"));
-    }, 3000);
+    }, 1000);
 
     client.on("message", data => {
       if (!MessageParser.valid(data)) return;
@@ -116,9 +117,7 @@ function fetchRollers(): Promise<any> {
         case "json":
           const resItem = JSON.parse(msg.message);
           if ("mac" in resItem) {
-            clearTimeout(timeout_id);
-            resolve(resItem);
-            client.close();
+            responses.push(resItem);
           }
           break;
         case "roller":
