@@ -10,6 +10,7 @@ import { fetchRollers } from "libs/udp";
 import { useRollers, makeMessage, Op, parseSettingMessages } from "libs/roller";
 import { useAlert } from "components/utils";
 // $FlowFixMe
+import isEmpty from "ramda/src/isEmpty";
 import "./RollerSelector.less";
 
 type tProps = {
@@ -17,6 +18,9 @@ type tProps = {
 };
 
 function rollerReducer(rollers, action) {
+  console.log("rollerReducer init val = ", rollers);
+  
+ // let newRollers = [];
   switch (action.type) {
     case "INVITE":
       const roller = action.payload;
@@ -25,10 +29,14 @@ function rollerReducer(rollers, action) {
       });
       if (rollers[index] === roller) return rollers;
       if (index >= 0) {
+        console.log("splic ", index);
         rollers.splice(index, 1, roller);
       } else {
+        console.log("push ");
         rollers.push(roller);
       }
+      console.log("Return ",rollers);
+      
       return [...rollers];
     default:
       return rollers;
@@ -63,7 +71,10 @@ const RollerSelector = (props: tProps) => {
         if (Array.isArray(data)) {
           data.map(roller => {
             roller.key = roller.mac;
+            console.log("add ",roller);
+            
             updateRollerByMac(roller);
+            writeBack();
             dispatchRollers({ type: "INVITE", payload: roller });
           });
           if (data.length > 0) {
@@ -94,6 +105,11 @@ const RollerSelector = (props: tProps) => {
     currentRollerChanged(roller);
     fetchSettings(roller.ip).then(data => {
       const settings = parseSettingMessages(data);
+      if (isEmpty(settings))
+      {
+        console.log("empty settings...");
+        return;
+      }
       console.log("fetch settings: ", data, settings);
       setCurrentRoller(pre => ({ ...pre, rollerSettings: settings }));
     });
