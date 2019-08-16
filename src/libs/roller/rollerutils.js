@@ -154,12 +154,14 @@ function parseSettingMessages(msg: Uint8Array): Object {
   const pkglength = PKGLENGTH; //v1 package
   if (msg[0] !== 0xb0) {
     //GET_SETTINGS
-    throw Error("Message Op code is not equal to 0xB0 : ");
+    console.log("Message Op code is not equal to 0xB0 : ");
+    return {};
   }
   msg.set([0xb1, version], 0);
   const dv = new DataView(msg.buffer);
   if (dv.getUint16(2, true) !== pkglength) {
-    throw Error("Package size invalid.");
+    console.log("Package size invalid.");
+    return {};
   }
 
   let _settings = {};

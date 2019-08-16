@@ -2,12 +2,36 @@
 import React from "react";
 import type { Node } from "react";
 import { Descriptions, Empty } from "antd";
+import mergeLeft from "ramda/src/mergeLeft";
 
 import type { tRoller } from "libs/roller/rollerType";
 
-const RollerInformaion = (props: tRoller): Node => {
-  const { rollerSettings } = props;
+const defaultValues = {
+    ip: "",
+    mac: "",
+    name: "",
+    subnet: "",
+    gateway: "",
+    host: "",
+    upperIP: "",
+    lowerIP: "",
+    forceNeighborIP: 0, //none=0 yse=1
+    eeyeTCPEvent: 0, //disable=0 enable=1
+    hostIP:"",
+    eoz: 0,
+    pe: 0, //clear=1, block-0
+    halfSpeed: 0, //disable
+    speed: 0,
+    currentSpeed: 0,
+    jamExprTime: 0, //JAM timer expiration time
+    rumExprTime: 0, // run timer expiration time
+    mode: 0 //Mode selection {Singulate, Slug, LongBox,...}
 
+}
+
+const RollerInformaion = (props: tRoller): Node => {
+  const { _rollerSettings } = props;
+  const rollerSettings = mergeLeft(_rollerSettings,defaultValues)
   return (
     <div>
       {props === undefined ? (
