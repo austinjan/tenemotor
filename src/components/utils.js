@@ -13,6 +13,7 @@ const useAlert = () => {
   };
 
   const displayError = (msg: string): void => {
+    setShowAlert(true);
     setAlertMsg(msg);
     setAlertType("error");
   };
