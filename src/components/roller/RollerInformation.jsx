@@ -3,8 +3,6 @@ import React from "react";
 import type { Node } from "react";
 import { Descriptions } from "antd";
 
-import type { tRoller } from "libs/roller/rollerType";
-
 const defaultValues = {
   ip: "",
   mac: "",

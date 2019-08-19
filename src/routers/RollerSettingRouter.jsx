@@ -8,17 +8,6 @@ import RollerPackageTest from "components/tests/RollerPackageTest";
 
 export const rollerSettingRouter = [
   {
-    key: "rollerSettingRouter__settings",
-    name: "Settings",
-    to: "/rollerSettings",
-    icon: "setting",
-    component: () => (
-      <div>
-        <h1>roller settings</h1>
-      </div>
-    )
-  },
-  {
     key: "rollerSettingRouter__styleGuide",
     name: "Style guide",
     to: "/rollerStyleGuide",
