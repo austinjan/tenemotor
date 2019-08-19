@@ -1,5 +1,5 @@
 // @flow
-import React, { useState, useReducer } from "react";
+import React, { useState, useReducer, useContext } from "react";
 import RollerTable from "./RollerTable";
 import RollerInformation from "./RollerInformation";
 import RollerSelectBar from "./RollerSelectBar";
@@ -8,9 +8,9 @@ import type { tRoller } from "libs/roller/rollerType";
 import { fetchSettings, sendTo } from "libs/tcp";
 import { fetchRollers } from "libs/udp";
 import { useRollers, makeMessage, Op, parseSettingMessages } from "libs/roller";
-import { useAlert } from "components/utils";
-// $FlowFixMe
+import { AlertContext } from "components/alertutils";
 import isEmpty from "ramda/src/isEmpty";
+// $FlowFixMe
 import "./RollerSelector.less";
 
 type tProps = {
@@ -19,8 +19,8 @@ type tProps = {
 
 function rollerReducer(rollers, action) {
   console.log("rollerReducer init val = ", rollers);
-  
- // let newRollers = [];
+
+  // let newRollers = [];
   switch (action.type) {
     case "INVITE":
       const roller = action.payload;
@@ -35,8 +35,8 @@ function rollerReducer(rollers, action) {
         console.log("push ");
         rollers.push(roller);
       }
-      console.log("Return ",rollers);
-      
+      console.log("Return ", rollers);
+
       return [...rollers];
     default:
       return rollers;
@@ -49,8 +49,14 @@ const RollerSelector = (props: tProps) => {
   const [showTable, setShowTable] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [currentRoller, setCurrentRoller] = useState({});
-  const [MyAlert, displayInfo, displayError, hideAlert] = useAlert();
+  const [currentRoller, setCurrentRoller] = useState({
+    ip: "",
+    mac: "",
+    gateway: "",
+    subnet: ""
+  });
+  const alert = useContext(AlertContext);
+
   const [helpText, setHelpText] = useState(
     "Press search button to scan rollers.."
   );
@@ -64,15 +70,16 @@ const RollerSelector = (props: tProps) => {
 
   const handleScan = () => {
     console.log("handleScan");
-    displayInfo("Scanning.....");
+    alert.info("Scanning...");
+
     fetchRollers()
       .then(data => {
         console.log("fetchRoller -> ", data);
         if (Array.isArray(data)) {
           data.map(roller => {
             roller.key = roller.mac;
-            console.log("add ",roller);
-            
+            console.log("add ", roller);
+
             updateRollerByMac(roller);
             writeBack();
             dispatchRollers({ type: "INVITE", payload: roller });
@@ -80,9 +87,9 @@ const RollerSelector = (props: tProps) => {
           if (data.length > 0) {
             setShowTable(true);
             setHelpText("Select roller...");
-            hideAlert();
+            alert.hide();
           } else {
-            displayError("No roller found..");
+            alert.error("No roller found..");
           }
         } else {
           data.key = data.mac;
@@ -90,12 +97,12 @@ const RollerSelector = (props: tProps) => {
           dispatchRollers({ type: "INVITE", payload: data });
           setShowTable(true);
           setHelpText("Select roller...");
-          hideAlert();
+          alert.hide();
         }
       })
       .catch(err => {
         console.log("fetchRollers error : ", err);
-        displayError(err);
+        alert.error(err);
       });
   };
 
@@ -105,8 +112,7 @@ const RollerSelector = (props: tProps) => {
     currentRollerChanged(roller);
     fetchSettings(roller.ip).then(data => {
       const settings = parseSettingMessages(data);
-      if (isEmpty(settings))
-      {
+      if (isEmpty(settings)) {
         console.log("empty settings...");
         return;
       }
@@ -170,7 +176,7 @@ const RollerSelector = (props: tProps) => {
         helpText={helpText}
         {...currentRoller}
       />
-      {MyAlert}
+
       {showInfo ? <RollerInformation {...currentRoller} /> : null}
       {Table}
 

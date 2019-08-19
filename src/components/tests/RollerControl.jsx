@@ -4,19 +4,19 @@ import { Typography, Row, Col, Alert } from "antd";
 import RollerControlPanel from "./RollerCongrolPanel";
 import RollerSelector from "components/roller/RollerSelector";
 import has from "ramda/src/has";
-// $FlowFixedMe
+// $FlowFixMe
 import "App.less";
 
 const RollerControl = () => {
   const [currentRoller, setCurrentRoller] = useState({});
   const [errorState, setError] = useState({ msg: "", diaplay: false });
-  function handleCurrentRollerChanged(newRoller: { ip: String }) {
+  const handleCurrentRollerChanged = (newRoller: { ip: string }) => {
     console.log("new roller : ", newRoller);
 
     has("ip", newRoller)
       ? setCurrentRoller(newRoller)
       : setError({ msg: "Roller missing ip address.", display: true });
-  }
+  };
 
   return (
     <div>

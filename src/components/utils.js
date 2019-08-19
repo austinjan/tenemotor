@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Alert } from "antd";
 
 const useAlert = () => {
   const [showAlert, setShowAlert] = useState(false);
@@ -22,11 +21,12 @@ const useAlert = () => {
     setShowAlert(false);
   };
 
-  const alertComponent = showAlert ? (
-    <Alert message={alertMsg} type={alertType} closable />
-  ) : null;
-
-  return [alertComponent, displayInfo, displayError, hideAlert];
+  return [
+    { alertMsg, alertType, showAlert },
+    displayInfo,
+    displayError,
+    hideAlert
+  ];
 };
 
 export { useAlert };

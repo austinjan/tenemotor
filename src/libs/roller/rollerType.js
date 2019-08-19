@@ -50,7 +50,7 @@ type tRollerPackageArg = {
 };
 
 type tRoller = tRollerGeneral & {
-  rollerSettings: tRollerSettings
+  rollerSettings: ?tRollerSettings
 };
 
 export type {

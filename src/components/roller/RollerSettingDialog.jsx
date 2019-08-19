@@ -59,4 +59,17 @@ const RollerSettingDialog = (props: tProps) => {
   );
 };
 
+RollerSettingDialog.defaultProps = {
+  rollerSettings: {
+    ip: "",
+    mac: "",
+    subnet: "",
+    gateway: "",
+    host: ""
+  },
+  visible: false,
+  onCancel: () => {},
+  onNetworkingChanged: () => {},
+  onRollerSettingsChanged: () => {}
+};
 export default RollerSettingDialog;

@@ -49,42 +49,29 @@ type tProps = {
   }
 };
 
-const defaultValue = {
-  ip: "",
-  mac: "",
-  subnet: "",
-  gateway: "",
-  host: ""
-};
-
 const NetworkingSettingForm = (props: tProps) => {
   const { onCancel, rollerSettings, onValueChanged } = props;
-  const normalizedSettings = mergeLeft(rollerSettings, defaultValue);
 
   const [loading, setLoading] = useState(false);
 
   return (
     <div>
       <Formik
-        initialValues={normalizedSettings}
+        initialValues={rollerSettings}
         onSubmit={(values, actions) => {
-          const newRollerSettings = mergeLeft(values, normalizedSettings);
+          const newRollerSettings = mergeLeft(values, rollerSettings);
           console.log("submiiiiiittttttt");
           actions.setSubmitting(false);
           setLoading(true);
           const msg = makeMessage(Op.config, {
-            oldip: normalizedSettings.ip,
+            oldip: rollerSettings.ip,
             ip: values.ip,
             subnet: values.subnet,
             gateway: values.gateway,
             host: values.host,
-            mac: normalizedSettings.mac
+            mac: rollerSettings.mac
           });
-          sendUDPMessage(
-            msg,
-            normalizedSettings.ip,
-            DEFAULT_UDP_BROADCASTING_PORT
-          );
+          sendUDPMessage(msg, rollerSettings.ip, DEFAULT_UDP_BROADCASTING_PORT);
           onValueChanged(newRollerSettings);
           setTimeout(() => {
             setLoading(false);
@@ -95,7 +82,7 @@ const NetworkingSettingForm = (props: tProps) => {
         render={({ errors, touched, isValidating }) => (
           <Form className="form-inline">
             <label>Mac : </label>{" "}
-            <span className="form_info">{normalizedSettings.mac}</span>
+            <span className="form_info">{rollerSettings.mac}</span>
             <label> Name : </label>
             <Field name="name" type="text" />
             <ErrorMessage name="name" component={ErrorDiv} />
@@ -123,6 +110,16 @@ const NetworkingSettingForm = (props: tProps) => {
       />
     </div>
   );
+};
+
+NetworkingSettingForm.defaultProps = {
+  rollerSettings: {
+    ip: "",
+    mac: "",
+    subnet: "",
+    gateway: "",
+    host: ""
+  }
 };
 
 export default NetworkingSettingForm;
