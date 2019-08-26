@@ -4,10 +4,11 @@ import mergeLeft from "ramda/src/mergeLeft";
 import has from "ramda/src/has";
 import is from "ramda/src/is";
 import { convertStringToByteArray } from "libs/udp/BinaryUtils";
-import equals from "ramda/src/equals";
-import props from "ramda/src/props";
-import reduce from "ramda/src/reduce";
-import innerJoin from "ramda/src/innerJoin";
+
+import map from "ramda/src/map";
+import assoc from "ramda/src/assoc";
+import find from "ramda/src/find";
+import propEq from "ramda/src/propEq";
 import { updateRoller } from "./settingsutils";
 
 const ipc = require("electron").ipcRenderer;
@@ -77,67 +78,6 @@ type useRollerSettingsReturn = [
 ];
 
 /**
- *
- * @param {*} initSettings
- * const [jsonSettings, responseState, writeSettings] = useRollerSettings();
- */
-// const useRollerSettings = (initSettings: ?String): useRollerSettingsReturn => {
-//   const [jsonSettings, setJsonSettings] = useState(initSettings);
-//   const [responseState, setResponseState] = useState({
-//     message: "",
-//     type: "info"
-//   });
-
-//   useEffect(() => {
-//     ipc.send("getSettings");
-//     setResponseState(pre => ({
-//       ...pre,
-//       type: "info",
-//       message: "Loading roller settings."
-//     }));
-//     ipc.on("response_settings", function(event, arg) {
-//       if (!equals(arg, jsonSettings)) {
-//         setJsonSettings(arg);
-//         setResponseState(pre => ({
-//           ...pre,
-//           type: "info",
-//           message: "Loading done..."
-//         }));
-//       }
-//     });
-
-//     ipc.on("settings_err", function(event, arg) {
-//       const errArguments = props(["code", "path"], arg);
-//       const msg = is(String, arg)
-//         ? arg
-//         : reduce((acc, elem) => acc + " " + elem, "", errArguments);
-
-//       setResponseState(pre => ({ ...pre, type: "error", message: msg }));
-//     });
-
-//     ipc.on("set_settings_done", (event, arg) => {
-//       setResponseState(pre => ({
-//         ...pre,
-//         type: "info",
-//         message: "Writting done..."
-//       }));
-//     });
-//     return () => {
-//       ipc.removeAllListeners("response_settings", () => {});
-//       ipc.removeAllListeners("settings_err", () => {});
-//       ipc.removeAllListeners("set_settings_done", () => {});
-//     };
-//   }, [jsonSettings]);
-
-//   const writeSettings = (settings: string) => {
-//     ipc.send("setSettings", settings);
-//     setResponseState(pre => ({ ...pre, type: "info", message: "Writting..." }));
-//   };
-
-//   return [jsonSettings, responseState, writeSettings];
-// };
-
-/**
  * read/write roller settings
  * const [rollers, updateRollerByMac, writeBack] = useRollers();
  * const newRollers = updateRollerByMac({mac:"00:00:00:11:22:aa", name:"dev1"});
@@ -181,13 +121,21 @@ const useRollers = (): [Array<any>, Function, Function, Function] => {
   };
 
   /**
-   * Give filterRollers, and return a list who's mac is contain in filterRollers
-   * @param {array of rollers} filterRollers filter condition
+   * Give scanRollers, and add name prop if name prop be found in settings
+   * @param {array of rollers} scanRollers Array of roller got from scan condition
    */
-  const interSetion = (filterRollers: Array<any>): Array<any> => {
-    return innerJoin((l, r) => l.mac === r.mac, rollers, filterRollers);
+  const assocName = (scanRollers: Array<any>): Array<any> => {
+    return map(roller => {
+      const matchRoller = find(propEq("mac", roller.mac), rollers);
+      if (matchRoller) {
+        return assoc("name", matchRoller.name, roller);
+      }
+      return roller;
+    }, scanRollers);
+
+    //return innerJoin((l, r) => l.mac === r.mac, rollers, filterRollers);
   };
-  return [rollers, updateRollerByMac, interSetion, writeBack];
+  return [rollers, updateRollerByMac, assocName, writeBack];
 };
 
 export { useRollerPackage, useRollers };
