@@ -27,6 +27,10 @@ const defaultValues = {
   }
 };
 
+/**
+ * Display roller netwroking settings & roller settings.
+ * @param {roller} props
+ */
 const RollerInformaion = (props: any): Node => {
   const { rollerSettings } = props;
   return (
