@@ -64,7 +64,7 @@ const RollerSelector = (props: tProps) => {
   const [
     settingRollers,
     updateRollerByMac,
-    interSection,
+    assocName,
     writeBack
   ] = useRollers();
 
@@ -161,7 +161,7 @@ const RollerSelector = (props: tProps) => {
   const Table = showTable ? (
     <RollerTable
       onConnect={handleCurrentRollerChanged}
-      rollers={interSection(rollers)}
+      rollers={assocName(rollers)}
     />
   ) : null;
 
@@ -175,6 +175,7 @@ const RollerSelector = (props: tProps) => {
         toggleInfo={handleToggleInfo}
         helpText={helpText}
         {...currentRoller}
+        key="RollerSelectBar"
       />
 
       {showInfo ? <RollerInformation {...currentRoller} /> : null}
