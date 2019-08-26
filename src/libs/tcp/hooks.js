@@ -1,9 +1,17 @@
 // @flow
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import mergeLeft from "ramda/src/mergeLeft";
-import { string } from "postcss-selector-parser";
 
 const net = require("electron").remote.require("net");
+
+type APIs = {
+  connect: (ip: string, port: number | string) => void,
+  disconnect: () => void,
+  send: (msg: string | Uint8Array) => void
+};
+
+type OnDataFunc = (data: Uint8Array) => void;
+type Return = { api: APIs, connecting: boolean };
 
 /**
  * Connect to socket
@@ -11,146 +19,101 @@ const net = require("electron").remote.require("net");
  * @param target {ip,port=5566}
  * @param {string} target.ip  IP address of target
  * @param {number} [target.port=5566]
- * @returns [status, receiveData, sendData];
- *  - status {message, type} can pass to <ConnectionAlert>  ex: <ConnectAlert {...status} />
- *  - rereceiveData: response from remote tcp socket.
+ * @returns {api, connecting}
+ *  - api {connect, disconnect, send}
+ *  - connecting: boolean connecting state.
  *  - sendData() : sendData()
  */
-const useTCPSocket = (
-  target: { ip: string, port?: number } | {}
-): [mixed, mixed, Function] => {
-  const [status, setStatus] = useState({
-    message: "",
-    type: "info",
-    connected: false
-  });
-  const [receiveData, setReceiveData] = useState([]);
+const useTCPSocket = ({
+  onData,
+  onError
+}: {
+  onData?: OnDataFunc,
+  onError?: (err: mixed) => void
+}): Return => {
+  const [connecting, setConnecting] = useState(false);
+  const [destSocket, setDestSocket] = useState({ ip: "", port: 5566 });
+
   const socket = useRef(new net.Socket());
 
-  const validTarget = useMemo(() => {
-    const _t = mergeLeft(target, { port: 5566 });
-    console.log("useTCPSocket useEffect valid target ", _t);
+  const cleanUp = () => {
+    console.log("xxxxx useTCPSocket close socket xxxxxx");
+    socket.current.removeAllListeners("data", () => {});
+    socket.current.removeAllListeners("error", () => {});
+    socket.current.removeAllListeners("close", () => {});
+    socket.current.destroy();
+    setConnecting(false);
+  };
 
-    const ip = target.ip || undefined;
-    if (ip) {
-      return _t;
-    } else return null;
-  }, [target]);
-
-  useEffect(() => {
-    // socket.current = new net.Socket();
-    //socket.current.setTimeout(3000);
-    console.log("useTCPSocket useEffect create socket ");
-    if (validTarget) {
-      try {
-        socket.current.connect(validTarget.port, validTarget.ip, () => {
-          setStatus(pre => ({
-            ...pre,
-            type: "info",
-            message: `Connect to ${validTarget.ip}:${
-              validTarget.port
-            } success!`,
-            connected: true
-          }));
-          socket.current.write("hello");
-        });
-      } catch (err) {
-        setStatus(pre => ({
-          ...pre,
-          type: "error",
-          message: `Error ${err}`,
-          connected: false
-        }));
-        socket.current.destroy();
+  const listenSocktEvent = () => {
+    socket.current.on("data", data => {
+      if (typeof onData === "function") {
+        onData(data);
       }
+    });
 
-      socket.current.on("data", rev => {
-        if (rev[0] === 82) return;
-        console.log("tcp onData : ", rev);
-        const hexString = rev.reduce(
-          (memo, i) => memo + " 0x" + ("0" + i.toString(16)).slice(-2),
-          ""
-        );
-        setStatus(pre => ({
-          ...pre,
-          type: "info",
-          message: `Socket recev data: ${hexString}`
-        }));
-        setReceiveData(rev);
-      });
+    socket.current.on("error", err => {
+      console.log("useTCPSoket error :", err);
+      if (typeof onError === "function") {
+        onError(err);
+      }
+    });
+    socket.current.on("close", () => {
+      console.log("socket close");
 
-      socket.current.on("close", () => {
-        console.log("tcp onClose");
-        setStatus(pre => ({
-          ...pre,
-          type: "warning",
-          message: `Socket closed !`,
-          connected: false
-        }));
-      });
+      // cleanUp();
+    });
+  };
 
-      socket.current.on("error", err => {
-        console.log("tcp onError", err);
-        setStatus(pre => ({
-          ...pre,
-          type: "error",
-          message: `Error ${err}`,
-          connected: false
-        }));
-        socket.current.destroy();
-      });
+  const doConnect = (dest?: { ip: string, port: number | string }) => {
+    const { ip, port } = dest || destSocket;
+    console.log(`doConnect ${ip}:${port}`);
 
-      socket.current.on("timeout", () => {
-        console.log("tcp onTimeout");
-        setStatus(pre => ({
-          ...pre,
-          type: "error",
-          message: `Timeout when connect to ${validTarget.ip}:${
-            validTarget.port
-          }`,
-          connected: false
-        }));
-        socket.current.end();
-      });
-    }
-
-    return () => {
-      console.log("useTCPSocket clean up socket...");
-      setStatus(pre => ({ ...pre, type: "info", message: "" }));
-      socket.current.end();
-      socket.current.removeAllListeners("data", () => {});
-      socket.current.removeAllListeners("error", () => {});
-      socket.current.removeAllListeners("close", () => {});
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      socket.current.removeAllListeners("timeout", () => {});
-    };
-  }, [validTarget]);
-
-  /**
-   *
-   * @param String|Uint8Array message
-   */
-  function sendData(message) {
-    if (!validTarget) throw Error("Target lost ip property.");
     try {
-      const success = socket.current.write(message);
-      const { ip = "0.0.0.0", port = "0000" } = validTarget;
-      if (success)
-        setStatus(pre => ({
-          ...pre,
-          type: "success",
-          message: `Write data to ${ip}:${port} success!!`
-        }));
+      socket.current.connect(port, ip, () => {
+        setConnecting(true);
+        listenSocktEvent();
+        setDestSocket({ ip, port });
+      });
     } catch (err) {
-      setStatus(pre => ({
-        ...pre,
-        type: "error",
-        message: `Send data error ${err}`
-      }));
+      socket.current.destroy();
+      if (typeof onError === "function") {
+        onError(err);
+      }
+    }
+  };
+
+  const connect = (ip: string, port: number | string = 5566): void => {
+    if (connecting) {
+      disconnect();
+      setTimeout(() => doConnect(), 1000);
+    }
+    doConnect({ ip, port });
+  };
+
+  function send(message: string | Uint8Array) {
+    try {
+      socket.current.write(message);
+    } catch (err) {
+      console.log("useTCPSocket send() error: ", err);
     }
   }
 
-  return [status, receiveData, sendData];
+  const disconnect = () => {
+    console.log("useTCPSocket disconnect ");
+    if (!connecting) return;
+
+    cleanUp();
+  };
+
+  return {
+    api: {
+      send,
+      connect,
+      disconnect
+    },
+    connecting
+  };
 };
 
 type Option = {
