@@ -21,7 +21,8 @@ function createWindow() {
       nodeIntegration: true
       // nodeIntegrationInWorker: false,
       // preload: "./preload.js"
-    }
+    },
+    icon: path.join(__dirname,"../public/AppIcon.icns"),
   });
 
   installExtension(REACT_DEVELOPER_TOOLS)
