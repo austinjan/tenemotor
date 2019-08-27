@@ -59,7 +59,7 @@ const getDataDom = data => {
     handleDataChanged,
     handleMotorIDChanged
  */
-const RollerPackage = props => {
+const RollerPackage = React.memo(props => {
   const { rollerPackage, showDetail } = props;
   const {
     handleCommandChanged,
@@ -73,7 +73,6 @@ const RollerPackage = props => {
   );
 
   useEffect(() => {
-    console.log("RollerPackage useEffect");
     setParsedPackage(parseRollerPackage(rollerPackage));
   }, [rollerPackage]);
 
@@ -151,6 +150,6 @@ const RollerPackage = props => {
       </div>
     </div>
   );
-};
+});
 
 export default RollerPackage;
