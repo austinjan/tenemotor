@@ -1,7 +1,6 @@
 // @flow
 import React, { useEffect, useState, useRef } from "react";
 
-
 const net = require("electron").remote.require("net");
 
 type APIs = {
@@ -192,7 +191,12 @@ const usePolling = (opt: Option, message: Array<string | Uint8Array>) => {
 
   const runPolling = () => {
     if (connecting.current) {
-      const timeoutID = setTimeout(() => {}, interval);
+      const timeoutID = setTimeout(() => {
+        message.forEach(msg => {
+          socket.current.send(msg);
+          console.log("usePolling sending ", msg);
+        });
+      }, interval);
       timerID.current = timeoutID;
     }
   };
