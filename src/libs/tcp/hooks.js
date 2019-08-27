@@ -1,6 +1,6 @@
 // @flow
-import React, { useEffect, useState, useRef, useMemo } from "react";
-import mergeLeft from "ramda/src/mergeLeft";
+import React, { useEffect, useState, useRef } from "react";
+
 
 const net = require("electron").remote.require("net");
 

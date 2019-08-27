@@ -4,7 +4,7 @@ module.exports = [
   [
     "use-babel-config",
     {
-      presets: ["react-app"],
+      presets: ["react-app", ["@babel/preset-flow", { all: true }]],
       plugins: [
         [
           "import",
