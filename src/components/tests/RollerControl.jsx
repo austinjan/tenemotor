@@ -2,7 +2,7 @@
 import React, { useState, useContext } from "react";
 import { Typography, Row, Col } from "antd";
 import PollingControlBar from "components/protocol/PollingControlBar";
-import RollerControlPanel from "./RollerCongrolPanel";
+import RollerInformationPanel from "./RollerInformationPanel";
 import RollerSelector from "components/roller/RollerSelector";
 import { useTCPSocket } from "libs/tcp/hooks";
 import { AlertContext } from "components/alertutils";
@@ -37,10 +37,10 @@ const RollerControl = () => {
       />
       <Row gutter={16} style={{ marginTop: "16px" }}>
         <Col span={12}>
-          <RollerControlPanel title="Upper" />
+          <RollerInformationPanel title="Upper" />
         </Col>
         <Col span={12}>
-          <RollerControlPanel title="Lower" />
+          <RollerInformationPanel title="Lower" />
         </Col>
       </Row>
     </div>
