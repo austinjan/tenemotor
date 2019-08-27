@@ -22,9 +22,9 @@ const bigEndian2Number = buffer => {
   }
 };
 
-const RollerResponse = props => {
+const RollerResponse = React.memo(props => {
   const { pkg } = props;
-  console.log("RollerResponse props ", props);
+
   const [parsedPackage, setParsedPackage] = useState({});
   useEffect(() => {
     setParsedPackage(parseRollerPackage(pkg.slice(4)));
@@ -62,7 +62,7 @@ const RollerResponse = props => {
       </table>
     </div>
   );
-};
+});
 
 RollerResponse.propTypes = {
   pkg: PropTypes.oneOfType([PropTypes.array, PropTypes.instanceOf(Uint8Array)])
