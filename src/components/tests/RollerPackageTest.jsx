@@ -61,7 +61,7 @@ const RollerPackageTest = () => {
       <Title level={3}> Connet </Title>
 
       <ConnectSocket
-        rollers={testRollers}
+        rollers={rollers}
         connecting={connecting}
         connect={connectSocket}
         disconnect={api.disconnect}

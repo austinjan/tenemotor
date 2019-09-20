@@ -13,16 +13,16 @@ import {
 } from "antd";
 
 type Props = {
-  title: string,
-  phaseCurrent: string | number,
-  motorPeriod: string | number,
-  cardTemperature: string | number,
-  fuzzy: string | number,
-  motorSpeed: string | number,
-  motorOnOff: string | number,
-  motorSpeedExpect: string | number,
-  onOnOffChanged: (v: boolean) => void,
-  onMotorSpeedChanged: (v: number) => void
+  title: string
+  // phaseCurrent: string | number,
+  // motorPeriod: string | number,
+  // cardTemperature: string | number,
+  // fuzzy: string | number,
+  // motorSpeed: string | number,
+  // motorOnOff: string | number,
+  // motorSpeedExpect: string | number,
+  // onOnOffChanged: (v: boolean) => void,
+  // onMotorSpeedChanged: (v: number | string) => void
 };
 const RollerInformationPanel = props => {
   const { title } = props;

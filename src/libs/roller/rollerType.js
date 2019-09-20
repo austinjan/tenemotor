@@ -49,14 +49,9 @@ type tRollerPackageArg = {
   motorID: number
 };
 
-type tRoller = tRollerGeneral & {
-  rollerSettings: ?tRollerSettings
-};
-
 export type {
   tRollerGeneral,
   tRollerSettings,
   tRollerReadCommand,
-  tRollerPackageArg,
-  tRoller
+  tRollerPackageArg
 };

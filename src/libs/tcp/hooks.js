@@ -132,6 +132,17 @@ type Option = {
  * @param {Function} opt.onData callback function when receive roller response
  * @param {Function} [opt.onError] callback function when error happen.
  * @param {string | Uint8Array} message data want to sent
+ * const [start,stop, polling ] = usePolling(opt:{
+ *  ip:"192.168.33.111",
+ *  port:5566 //option,
+ *  interval = 1000, //default 1000ms
+ *  onData = callback when response,
+ *  onError = callback when error happen.
+ * },[
+ * Uint8Array.from([0xA1,ID,0x00,0x00,0x55,0x02,0x01,0x01,0x02,0x00]),
+ * Uint8Array.form([0xA1,ID,0x00,0x00,0x55,0x02,0x02,0x01,0x03,0x00]),
+ * Uint8Array.form([0xA1,ID,0x00,0x00,0x55, 0x2, 0x3, 0x1, 0x4 ,0x0])
+ * ])
  */
 const usePolling = (opt: Option, message: Array<string | Uint8Array>) => {
   const { ip, port = 5566, interval = 1000, onData, onError = err => {} } = opt;
@@ -151,6 +162,8 @@ const usePolling = (opt: Option, message: Array<string | Uint8Array>) => {
   useEffect(() => {
     try {
       socket.current.connect(port, ip);
+      console.log("usePolling connected ", ip);
+
       connecting.current = true;
     } catch (err) {
       onError(err);
@@ -160,7 +173,7 @@ const usePolling = (opt: Option, message: Array<string | Uint8Array>) => {
     return () => {
       console.log("usePolling clean up socket...");
 
-      socket.current.end();
+      socket.current.destroy();
       socket.current.removeAllListeners("data", () => {});
       socket.current.removeAllListeners("error", () => {});
     };
@@ -175,9 +188,10 @@ const usePolling = (opt: Option, message: Array<string | Uint8Array>) => {
   });
 
   const stopPolling = () => {
+    if (!isPolling) return;
     if (connecting.current) {
       if (timerID.current) {
-        clearTimeout(timerID.current);
+        clearInterval(timerID.current);
         timerID.current = null;
       }
       setPolling(false);
@@ -191,15 +205,23 @@ const usePolling = (opt: Option, message: Array<string | Uint8Array>) => {
 
   const runPolling = () => {
     if (connecting.current) {
-      const timeoutID = setTimeout(() => {
-        message.forEach(msg => {
-          socket.current.send(msg);
-          console.log("usePolling sending ", msg);
+      const timeoutID = setInterval(() => {
+        message.forEach((msg, index) => {
+          setTimeout(() => {
+            try {
+              socket.current.write(msg);
+              console.log("usePolling sending ", msg);
+            } catch (err) {
+              console.log("usePolling send err ", err);
+            }
+          }, 500 * index);
         });
       }, interval);
       timerID.current = timeoutID;
     }
   };
+
+  return [startPolling, stopPolling, isPolling];
 };
 
 export { useTCPSocket, usePolling };

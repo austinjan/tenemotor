@@ -4,7 +4,7 @@ import RollerTable from "./RollerTable";
 import RollerInformation from "./RollerInformation";
 import RollerSelectBar from "./RollerSelectBar";
 import RollerSettingDialog from "components/roller/RollerSettingDialog";
-import type { tRoller } from "libs/roller/rollerType";
+
 import { fetchSettings, sendTo } from "libs/tcp";
 import { fetchRollers } from "libs/udp";
 import { useRollers, makeMessage, Op, parseSettingMessages } from "libs/roller";
@@ -14,7 +14,7 @@ import isEmpty from "ramda/src/isEmpty";
 import "./RollerSelector.less";
 
 type tProps = {
-  currentRollerChanged: (newRoller: tRoller) => {}
+  currentRollerChanged: (newRoller: { [key: string]: any }) => void
 };
 
 function rollerReducer(rollers, action) {

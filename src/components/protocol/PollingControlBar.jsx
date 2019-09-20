@@ -4,7 +4,7 @@ import { Button, Badge } from "antd";
 import has from "ramda/src/has";
 
 const PollingControlBar = (props: {
-  roller: { ip: string, port: string | number },
+  roller: { [key: string]: any },
   connecting: boolean,
   onConnect: Function,
   onDisconnect: Function
