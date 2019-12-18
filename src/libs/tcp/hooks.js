@@ -146,12 +146,12 @@ type Option = {
  */
 const usePolling = (opt: Option, message: Array<string | Uint8Array>) => {
   const { ip, port = 5566, interval = 1000, onData, onError = err => {} } = opt;
-  const version = React.version.split("-");
-  if (version[0] < "16.7.0") {
-    throw new Error(
-      "Hooks are only supported in React 16.7.0-alpha release or above"
-    );
-  }
+  // const version = React.version.split("-");
+  // if (version[0] < "16.7.0") {
+  //   throw new Error(
+  //     "Hooks are only supported in React 16.7.0-alpha release or above"
+  //   );
+  // }
 
   const [isPolling, setPolling] = useState(false);
 

@@ -13,6 +13,7 @@
     "postinstall": "electron-builder install-app-deps",
     "preelectron-pack": "yarn build",
     "electron-pack": "build -mw",
+    "build-win": "electron-builder --win --x64",
     "flow": "flow"
   },
   "eslintConfig": {
@@ -41,8 +42,8 @@
     "lodash": "^4.17.11",
     "prop-types": "^15.7.2",
     "ramda": "^0.26.1",
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6",
+    "react": ">16.8.6",
+    "react-dom": ">16.8.6",
     "react-hanger": "^2.0.0",
     "react-router-dom": "^5.0.0",
     "react-scripts": "3.0.0",
@@ -71,14 +72,20 @@
   },
   "author": {
     "name": "Austin Jan",
-    "email": "austin.jan@gmail.com"
+    "email": "austinchiang@atop.com.tw"
   },
   "build": {
     "appId": "com.tene.rollerconfig",
     "productName": "Tene-Roller-config",
-    "copyright": "Copyright © 2019 ${author}",
+    "copyright": "Copyright © 2019 Atop Co., Ltd.",
     "mac": {
       "category": "public.app-category.utilities"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "zip"
+      ]
     },
     "files": [
       "build/**/*",

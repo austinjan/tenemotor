@@ -11,6 +11,9 @@ import has from "ramda/src/has";
 // $FlowFixMe
 import "App.less";
 
+const REACT_VERSION = React.version;
+console.log("REACT_VERSION ", REACT_VERSION);
+
 const pollingMessages = [
   makeMessage(Op.roller, { command: 0x01, rw: 0x01, data: [], motorID: 0 }), //Phase Current
   makeMessage(Op.roller, { command: 0x01, rw: 0x01, data: [], motorID: 1 }) //Phase Current id=1
