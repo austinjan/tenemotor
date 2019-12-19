@@ -22,7 +22,7 @@ function createWindow() {
       // nodeIntegrationInWorker: false,
       // preload: "./preload.js"
     },
-    icon: path.join(__dirname,"../public/AppIcon.icns"),
+    icon: path.join(__dirname, "../public/AppIcon.icns"),
   });
 
   installExtension(REACT_DEVELOPER_TOOLS)
@@ -43,7 +43,7 @@ function createWindow() {
   }
 
   // Emitted when the window is closed.
-  mainWindow.on("closed", function() {
+  mainWindow.on("closed", function () {
     // Dereference the window object, usually you would store windows
     // in an array if your app supports multi windows, this is the time
     // when you should delete the corresponding element.
@@ -57,13 +57,13 @@ function createWindow() {
 app.on("ready", createWindow);
 
 // Quit when all windows are closed.
-app.on("window-all-closed", function() {
+app.on("window-all-closed", function () {
   // On macOS it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
   if (process.platform !== "darwin") app.quit();
 });
 
-app.on("activate", function() {
+app.on("activate", function () {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (mainWindow === null) createWindow();
@@ -75,18 +75,21 @@ ipc.on("broadcasting", (event, arg) => {
   //console.log("broadcasting.....", event, arg);
   const { message, port } = arg;
   const dgram = require("dgram");
-  //const broadcastAddress = require("broadcast-address");
+
   const client = dgram.createSocket({ type: "udp4", reuseAddr: true });
-  //const ip = broadcastAddress();
-  //client.setBroadcast(true);
-  client.bind(() => {
-    client.setBroadcast(true);
-    console.log("broadcasting ", "255.255.255.255", port, message);
-    client.send(message, port, "255.255.255.255", err => {
+
+
+
+  client.setBroadcast(true);
+  console.log("broadcasting ", "255.255.255.255", port, message);
+  client.send(message, port, "255.255.255.255", err => {
+
+    if (err) {
       client.close();
-      if (err) console.log("err:", err);
-    });
+      console.log("err:", err);
+    }
   });
+
 });
 
 ipc.on("getSettings", (event, arg) => {

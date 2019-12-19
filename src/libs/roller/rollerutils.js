@@ -269,10 +269,13 @@ const isRollerMessage = R.allPass([isArray, hadRollerPackage]);
 function isJSONMessage(message) {
   let buffer = Uint8Array.from(message);
   let op = String.fromCharCode(...buffer.subarray(0, 2));
+  console.log("valid json op ", op)
   if (op === "JS") {
+    console.log("INNNNNNNNNNNNNNNn")
     try {
       let length = buffer.length - 4;
       let json = String.fromCharCode(...buffer.subarray(4, length + 4));
+      console.log(json)
       JSON.parse(json);
       return json;
     } catch (err) {

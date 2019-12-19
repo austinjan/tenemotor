@@ -83,12 +83,8 @@ function sendUDPMessage(message, ip, port = 5566) {
 }
 
 function fetchRollers(): Promise<any> {
-  const message = makeMessage(Op.atop_invite);
-  //console.log("scan :", message);
-  require("electron").ipcRenderer.send("broadcasting", {
-    message,
-    port: DEFAULT_UDP_BROADCASTING_PORT
-  });
+
+
 
   const client = dgram.createSocket({ type: "udp4", reuseAddr: true });
 
@@ -96,6 +92,12 @@ function fetchRollers(): Promise<any> {
     const responses = [];
     try {
       client.bind(55954);
+      const message = makeMessage(Op.atop_invite);
+      //console.log("scan :", message);
+      require("electron").ipcRenderer.send("broadcasting", {
+        message,
+        port: DEFAULT_UDP_BROADCASTING_PORT
+      });
     } catch (err) {
       reject(err);
     }
@@ -104,11 +106,13 @@ function fetchRollers(): Promise<any> {
     });
 
     setTimeout(() => {
-      resolve(responses);
+      //resolve(responses);
+      reject(new Error("Time out!"))
       client.close();
-    }, 1000);
+    }, 5000);
 
     client.on("message", data => {
+
       if (!MessageParser.valid(data)) return;
 
       const msg = MessageParser.parse(data);
@@ -118,6 +122,7 @@ function fetchRollers(): Promise<any> {
           const resItem = JSON.parse(msg.message);
           if ("mac" in resItem) {
             responses.push(resItem);
+            resolve(responses)
           }
           break;
         case "roller":
@@ -127,6 +132,8 @@ function fetchRollers(): Promise<any> {
       }
     });
   });
+
+
 }
 
 export { getUdpObservable, jsonResponse, sendUDPMessage, fetchRollers };

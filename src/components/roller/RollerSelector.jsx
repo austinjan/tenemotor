@@ -102,7 +102,7 @@ const RollerSelector = (props: tProps) => {
       })
       .catch(err => {
         console.log("fetchRollers error : ", err);
-        alert.error(err);
+        alert.error(err.message);
       });
   };
 
@@ -160,34 +160,34 @@ const RollerSelector = (props: tProps) => {
 
   const Table = showTable ? (
     <RollerTable
-      onConnect={handleCurrentRollerChanged}
-      rollers={assocName(rollers)}
+      onConnect={ handleCurrentRollerChanged }
+      rollers={ assocName(rollers) }
     />
   ) : null;
 
   return (
     <div>
       <RollerSelectBar
-        showTable={showTable}
-        onScan={handleScan}
-        onSetting={handleSetting}
-        toggleShowTable={handleToggleTable}
-        toggleInfo={handleToggleInfo}
-        helpText={helpText}
-        {...currentRoller}
+        showTable={ showTable }
+        onScan={ handleScan }
+        onSetting={ handleSetting }
+        toggleShowTable={ handleToggleTable }
+        toggleInfo={ handleToggleInfo }
+        helpText={ helpText }
+        { ...currentRoller }
         key="RollerSelectBar"
       />
 
-      {showInfo ? <RollerInformation {...currentRoller} /> : null}
-      {Table}
+      { showInfo ? <RollerInformation { ...currentRoller } /> : null }
+      { Table }
 
       <RollerSettingDialog
-        visible={showSettings}
-        onOk={handleSettingsOk}
-        onCancel={handleSettingsCancel}
-        rollerSettings={currentRoller}
-        onNetworkingChanged={handleNetworkingSettingChanged}
-        onRollerSettingsChanged={handleRollerSettingsChanged}
+        visible={ showSettings }
+        onOk={ handleSettingsOk }
+        onCancel={ handleSettingsCancel }
+        rollerSettings={ currentRoller }
+        onNetworkingChanged={ handleNetworkingSettingChanged }
+        onRollerSettingsChanged={ handleRollerSettingsChanged }
       />
     </div>
   );
