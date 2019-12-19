@@ -80,15 +80,19 @@ ipc.on("broadcasting", (event, arg) => {
 
 
 
-  client.setBroadcast(true);
-  console.log("broadcasting ", "255.255.255.255", port, message);
-  client.send(message, port, "255.255.255.255", err => {
 
-    if (err) {
-      client.close();
-      console.log("err:", err);
-    }
-  });
+  client.bind(() => {
+    client.setBroadcast(true);
+    console.log("broadcasting ", "255.255.255.255", port, message);
+    client.send(message, port, "255.255.255.255", err => {
+
+      if (err) {
+        client.close();
+        console.log("err:", err);
+      }
+    });
+  })
+
 
 });
 
