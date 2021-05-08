@@ -39,7 +39,7 @@
     "electron-is-dev": "^1.1.0",
     "flow-bin": "^0.103.0",
     "formik": "^1.5.8",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.21",
     "prop-types": "^15.7.2",
     "ramda": "^0.26.1",
     "react": ">16.8.6",
